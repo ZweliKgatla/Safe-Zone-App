@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeZone — Keeping the people who matter most within reach</title>
+<meta name="description" content="SafeZone: live location, safe-zone alerts, SOS and an AI guardian assistant for children, elderly relatives, lone workers and valuables in South Africa.">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#000; --card:#050505; --accent:turquoise; --accent2:darkorange; --alert:indianred;
+    --text:aliceblue; --muted:#8393a6; --border:rgba(59,232,176,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:70px; }
+  body { background:var(--bg); font-family:'Sora',sans-serif; color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:linear-gradient(rgba(59,232,176,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,232,176,0.03) 1px,transparent 1px);
+    background-size:40px 40px; }
+  .page { position:relative; z-index:1; }
+  a { color:inherit; }
+  :focus-visible { outline:1.5px solid var(--accent); outline-offset:3px; }
+  .hidden { display:none !important; }
+  .accent { color:var(--accent); }
+
+  /* NAV */
+  .nav { position:sticky; top:0; z-index:30; background:rgba(0,0,0,0.82); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); }
+  .nav-inner { max-width:1240px; margin:0 auto; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .logo { display:inline-block; font-size:20px; font-weight:700; letter-spacing:-0.5px; color:var(--accent); text-decoration:none; }
+  .logo span { color:var(--text); }
+  .nav-links { display:flex; gap:18px; font-size:12.5px; font-weight:500; }
+  .nav-links a { text-decoration:none; color:var(--muted); white-space:nowrap; }
+  .nav-links a:hover { color:var(--text); }
+  .nav-auth { display:flex; gap:8px; align-items:center; }
+  .menu-btn { display:none; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:8px; width:38px; height:36px; font-size:18px; cursor:pointer; }
+
+  /* BUTTONS */
+  .btn { display:inline-block; padding:11px 22px; border-radius:10px; border:none; cursor:pointer; font-family:'Sora',sans-serif; font-size:13px; font-weight:600; letter-spacing:.3px; text-decoration:none; text-align:center; transition:transform .15s ease; }
+  .btn:hover { transform:translateY(-1px); }
+  .btn-primary { background:var(--accent); color:#000; }
+  .btn-outline { background:transparent; color:var(--accent); border:1px solid rgba(59,232,176,0.35); }
+  .btn-ghost { background:transparent; color:var(--text); }
+  .btn-ghost:hover { color:var(--accent); }
+  .btn-small { padding:8px 16px; font-size:12px; }
+  .btn-large { padding:15px 30px; font-size:14px; }
+
+  /* HERO */
+  .hero { max-width:1240px; margin:0 auto; padding:64px 24px 80px; display:grid; grid-template-columns:1.05fr .95fr; gap:48px; align-items:center; }
+  .hero-logo { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .hero-logo .mark { width:54px; height:54px; border-radius:16px; background:rgba(59,232,176,0.1); border:1px solid rgba(59,232,176,0.4); display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 0 30px rgba(59,232,176,0.15); }
+  .hero-logo .word { font-size:30px; font-weight:800; letter-spacing:-1px; color:var(--accent); }
+  .hero-logo .word span { color:var(--text); }
+  .hero h1 { font-size:clamp(2.1rem,4vw,3.2rem); font-weight:800; line-height:1.1; letter-spacing:-1px; margin-bottom:18px; }
+  .lede { font-size:1rem; color:var(--muted); max-width:34rem; margin-bottom:28px; line-height:1.65; }
+  .hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
+  .store-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+  .store-badge { display:inline-flex; align-items:center; gap:10px; background:#0b0b0b; border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:8px 16px; text-decoration:none; cursor:pointer; font-family:'Sora',sans-serif; color:var(--text); text-align:left; }
+  .store-badge:hover { border-color:var(--accent); }
+  .store-badge .ico { font-size:22px; }
+  .store-badge small { display:block; font-size:9px; color:var(--muted); letter-spacing:.4px; }
+  .store-badge b { font-size:14px; }
+  .demo-tag { display:block; margin-top:10px; font-size:10.5px; color:var(--muted); font-family:'DM Mono',monospace; }
+
+  /* PHONES */
+  .phone-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .phone-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-align:center; }
+  .phone { width:240px; background:#000; border-radius:36px; border:2px solid var(--border); overflow:hidden; position:relative; box-shadow:0 0 0 1px rgba(255,255,255,0.04),0 24px 60px rgba(0,0,0,0.6),0 0 40px rgba(59,232,176,0.08); }
+  .phone::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:80px; height:22px; background:#000; border-radius:0 0 18px 18px; z-index:10; }
+  .phone-screen { padding:34px 0 18px; height:470px; display:flex; flex-direction:column; }
+  .statusbar { display:flex; justify-content:space-between; padding:0 18px 8px; font-size:9px; font-family:'DM Mono',monospace; color:var(--muted); }
+  .screen-header { padding:6px 16px 10px; border-bottom:1px solid var(--border); }
+  .screen-title { font-size:13px; font-weight:700; color:var(--accent); }
+  .screen-step { font-size:9px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+  .screen-body { padding:12px 16px; flex:1; display:flex; flex-direction:column; gap:9px; overflow:hidden; }
+  .screen-body > * { flex-shrink:0; }
+  .tabbar { display:flex; justify-content:space-around; padding:10px 8px 0; border-top:1px solid var(--border); font-size:15px; }
+  .tabbar span.on { filter:drop-shadow(0 0 4px turquoise); }
+  .tabbar span { opacity:.5; } .tabbar span.on { opacity:1; }
+  .processing { background:rgba(59,232,176,0.06); border:1px solid rgba(59,232,176,0.2); border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:8px; }
+  .proc-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  .proc-text { font-size:10px; color:var(--accent); }
+  .status-badge { display:inline-flex; gap:5px; padding:4px 10px; border-radius:99px; font-size:9px; font-weight:600; background:rgba(59,232,176,0.15); color:var(--accent); border:1px solid rgba(59,232,176,0.3); }
+  .status-badge.warn { background:rgba(249,115,22,0.15); color:var(--accent2); border-color:rgba(249,115,22,0.35); }
+  .map-widget { border-radius:12px; overflow:hidden; position:relative; height:120px; background:midnightblue; border:1px solid var(--border); }
+  .map-widget.tall { height:250px; }
+  .map-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(59,232,176,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,232,176,0.07) 1px,transparent 1px); background-size:20px 20px; }
+  .zone-ring { position:absolute; border-radius:50%; border:1.5px dashed rgba(59,232,176,0.55); background:rgba(59,232,176,0.08); }
+  .map-pin { position:absolute; width:10px; height:10px; border-radius:50%; }
+  .pin-you { background:var(--accent); box-shadow:0 0 0 3px rgba(59,232,176,0.25); }
+  .pin-member { background:var(--accent2); box-shadow:0 0 0 3px rgba(249,115,22,0.25); animation:memberPulse 2s infinite; }
+  @keyframes memberPulse { 0%,100%{box-shadow:0 0 0 3px rgba(249,115,22,0.25);} 50%{box-shadow:0 0 0 8px rgba(249,115,22,0.08);} }
+  .map-label { position:absolute; bottom:6px; right:8px; font-size:8px; font-family:'DM Mono',monospace; color:var(--muted); }
+  .map-legend { display:flex; gap:12px; }
+  .legend-item { display:flex; align-items:center; gap:4px; font-size:8px; color:var(--muted); }
+  .legend-dot { width:6px; height:6px; border-radius:50%; }
+  .field { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px 12px; }
+  .field-label { font-size:8px; color:var(--muted); letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; }
+  .field-value { font-size:11px; font-family:'DM Mono',monospace; }
+  .mini-btn { background:var(--accent); color:#000; border-radius:10px; text-align:center; font-size:11px; font-weight:700; padding:9px; }
+  .mini-btn.out { background:transparent; color:var(--accent); border:1px solid rgba(59,232,176,0.35); }
+  .list-row { display:flex; align-items:center; gap:9px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:8px 10px; font-size:10px; }
+  .list-row .av { width:26px; height:26px; border-radius:50%; background:rgba(59,232,176,0.15); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .list-row b { display:block; font-size:10.5px; } .list-row small { color:var(--muted); font-size:8.5px; }
+  .list-row .end { margin-left:auto; font-size:9px; color:var(--accent); font-family:'DM Mono',monospace; }
+  .toggle { width:30px; height:17px; border-radius:99px; background:var(--accent); position:relative; margin-left:auto; flex-shrink:0; }
+  .toggle::after { content:''; position:absolute; top:2px; right:2px; width:13px; height:13px; border-radius:50%; background:#000; }
+  .toggle.off { background:rgba(255,255,255,0.15); } .toggle.off::after { right:auto; left:2px; background:#aaa; }
+  .slider { height:4px; border-radius:4px; background:rgba(255,255,255,0.12); position:relative; margin:8px 0 4px; }
+  .slider i { position:absolute; left:0; top:0; height:4px; width:40%; background:var(--accent); border-radius:4px; }
+  .slider i::after { content:''; position:absolute; right:-5px; top:-4px; width:12px; height:12px; border-radius:50%; background:var(--accent); }
+  .sos-big { margin:14px auto 6px; width:130px; height:130px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#ff7a7a,#c0392b); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; color:#fff; letter-spacing:1px; box-shadow:0 0 0 10px rgba(239,68,68,0.15),0 0 0 22px rgba(239,68,68,0.07); }
+  .center { text-align:center; } .muted { color:var(--muted); } .tiny { font-size:9.5px; line-height:1.5; }
+  .avatar-lg { width:62px; height:62px; border-radius:50%; background:rgba(59,232,176,0.15); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:30px; margin:6px auto; }
+
+  /* SECTIONS */
+  .section-divider { text-align:center; padding:32px 24px 18px; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:16px; max-width:1240px; margin:0 auto; }
+  .section-divider::before,.section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .section { max-width:1240px; margin:0 auto; padding:16px 24px 64px; }
+  .section-title { text-align:center; font-size:clamp(1.5rem,2.6vw,2.1rem); margin:0 auto 12px; max-width:36rem; letter-spacing:-.5px; line-height:1.2; }
+  .section-sub { text-align:center; color:var(--muted); font-size:13px; max-width:38rem; margin:0 auto 34px; line-height:1.65; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; }
+  .card h3 { font-size:14.5px; margin-bottom:6px; }
+  .card p { color:var(--muted); font-size:12.5px; line-height:1.6; }
+  .grid { display:grid; gap:14px; }
+  .g2 { grid-template-columns:repeat(2,1fr); } .g3 { grid-template-columns:repeat(3,1fr); } .g4 { grid-template-columns:repeat(4,1fr); } .g5 { grid-template-columns:repeat(5,1fr); }
+  .emoji { font-size:26px; display:block; margin-bottom:10px; }
+  .tag { display:inline-block; font-family:'DM Mono',monospace; font-size:9.5px; letter-spacing:.8px; color:#000; background:var(--accent2); border-radius:99px; padding:2px 8px; margin-left:6px; vertical-align:middle; font-weight:600; }
+  .tag.soon { background:rgba(255,255,255,0.14); color:var(--text); }
+  .about-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:34px; align-items:start; }
+  .about-grid h3 { color:var(--accent); font-size:15px; margin:18px 0 6px; } .about-grid h3:first-child { margin-top:0; }
+  .about-grid p { color:var(--muted); font-size:13.5px; line-height:1.75; }
+  .quote-card { border-left:3px solid var(--accent); }
+  .big-q { font-size:1.15rem; font-weight:700; line-height:1.5; letter-spacing:-.3px; }
+
+  .steps { list-style:none; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; counter-reset:s; }
+  .steps li { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; counter-increment:s; }
+  .steps li::before { content:'0' counter(s); font-family:'DM Mono',monospace; color:var(--accent); font-size:13px; letter-spacing:1px; display:block; margin-bottom:8px; }
+  .steps h3 { font-size:14.5px; margin-bottom:6px; } .steps p { color:var(--muted); font-size:12.5px; line-height:1.6; }
+  .feature-card.featured { border-color:rgba(239,68,68,0.35); background:rgba(239,68,68,0.06); } .feature-card.featured h3 { color:var(--alert); }
+  .feature-card h3 { color:var(--accent); }
+
+  /* PRICING */
+  .billing-toggle { display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:30px; font-size:12px; color:var(--muted); }
+  .switch { width:46px; height:26px; border-radius:99px; background:rgba(255,255,255,0.1); border:1px solid var(--border); position:relative; cursor:pointer; }
+  .switch::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:var(--accent); transition:transform .2s ease; }
+  .switch.on::after { transform:translateX(20px); }
+  .save-pill { background:rgba(59,232,176,0.15); color:var(--accent); border:1px solid rgba(59,232,176,0.3); border-radius:99px; padding:2px 8px; font-size:10px; font-weight:600; }
+  .pricing-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-items:stretch; }
+  .plan { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:24px 20px; display:flex; flex-direction:column; position:relative; }
+  .plan.popular { border-color:var(--accent); box-shadow:0 0 40px rgba(59,232,176,0.1); }
+  .plan .badge { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--accent); color:#000; font-size:10px; font-weight:700; padding:3px 12px; border-radius:99px; white-space:nowrap; }
+  .plan h3 { font-size:15px; margin-bottom:4px; }
+  .plan .for { font-size:11.5px; color:var(--muted); min-height:34px; line-height:1.5; }
+  .price { margin:16px 0 4px; font-size:30px; font-weight:800; letter-spacing:-1px; }
+  .price small { font-size:12px; color:var(--muted); font-weight:500; letter-spacing:0; }
+  .billed { font-size:10.5px; color:var(--muted); font-family:'DM Mono',monospace; min-height:16px; margin-bottom:16px; }
+  .plan ul { list-style:none; display:flex; flex-direction:column; gap:9px; margin-bottom:22px; flex:1; }
+  .plan li { font-size:12px; display:flex; gap:8px; line-height:1.45; }
+  .plan li::before { content:'✓'; color:var(--accent); font-weight:700; }
+  .plan li.off { color:var(--muted); } .plan li.off::before { content:'–'; color:var(--muted); }
+  .plan .btn { width:100%; }
+  .pricing-note { text-align:center; font-size:11px; color:var(--muted); margin-top:20px; font-family:'DM Mono',monospace; line-height:1.7; }
+
+  /* APP MOCKUPS */
+  .mock-row { display:flex; gap:26px; overflow-x:auto; padding:10px 6px 24px; scroll-snap-type:x mandatory; justify-content:flex-start; }
+  .mock-row .phone-wrap { scroll-snap-align:center; flex:0 0 auto; }
+  .mock-row::-webkit-scrollbar { height:6px; } .mock-row::-webkit-scrollbar-thumb { background:rgba(59,232,176,0.25); border-radius:3px; }
+  .scroll-hint { text-align:center; font-size:10.5px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:-6px; }
+
+  /* TECH */
+  .tech-card .emoji { font-size:24px; }
+
+  /* STATS */
+  .stat { text-align:center; }
+  .stat .num { font-size:clamp(1.8rem,3vw,2.5rem); font-weight:800; color:var(--accent); letter-spacing:-1px; line-height:1.1; }
+  .stat .lbl { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5; }
+  .sources { text-align:center; font-size:11px; color:var(--muted); margin-top:20px; line-height:1.8; }
+  .sources a { color:var(--accent); }
+
+  /* TESTIMONIALS */
+  .t-card .who { display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .t-card .who .av { width:36px; height:36px; border-radius:50%; background:rgba(59,232,176,0.15); display:flex; align-items:center; justify-content:center; }
+  .t-card .who b { font-size:12.5px; display:block; } .t-card .who small { color:var(--muted); font-size:10.5px; }
+  .t-card p.q { font-size:13px; color:var(--text); line-height:1.7; }
+  .stars { color:var(--accent2); letter-spacing:2px; font-size:13px; margin-bottom:8px; }
+
+  /* ROADMAP */
+  .roadmap { position:relative; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .rm-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; position:relative; }
+  .rm-card .when { font-family:'DM Mono',monospace; font-size:11px; color:var(--accent); letter-spacing:1px; }
+  .rm-card h3 { font-size:14.5px; margin:8px 0 8px; }
+  .rm-card ul { list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .rm-card li { font-size:12px; color:var(--muted); line-height:1.5; padding-left:16px; position:relative; }
+  .rm-card li::before { content:'›'; position:absolute; left:2px; color:var(--accent); }
+  .rm-card.now { border-color:var(--accent); box-shadow:0 0 30px rgba(59,232,176,0.08); }
+
+  /* PARTNERS */
+  .partner { text-align:center; border:1px dashed rgba(59,232,176,0.3); border-radius:14px; padding:22px 12px; }
+  .partner .emoji { margin-bottom:6px; } .partner b { display:block; font-size:12.5px; } .partner small { color:var(--muted); font-size:10.5px; }
+
+  /* FAQ */
+  .faq { max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:10px; }
+  .faq details { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:0 18px; }
+  .faq summary { cursor:pointer; padding:16px 0; font-size:13.5px; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:12px; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:'+'; color:var(--accent); font-size:18px; line-height:1; }
+  .faq details[open] summary::after { content:'–'; }
+  .faq details p { color:var(--muted); font-size:12.8px; line-height:1.75; padding:0 0 16px; }
+
+  /* CONTACT */
+  .contact-grid { display:grid; grid-template-columns:.9fr 1.1fr; gap:24px; align-items:start; }
+  .contact-line { display:flex; gap:12px; align-items:center; margin-bottom:14px; font-size:13px; }
+  .contact-line .ci { width:38px; height:38px; border-radius:10px; background:rgba(59,232,176,0.1); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .contact-line small { display:block; color:var(--muted); font-size:10.5px; }
+  .socials { display:flex; gap:10px; margin-top:20px; }
+  .socials a { width:40px; height:40px; border-radius:50%; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; text-decoration:none; color:var(--accent); font-family:'Sora',sans-serif; }
+  .socials a:hover { background:rgba(59,232,176,0.12); }
+  .contact-form { display:flex; flex-direction:column; gap:12px; }
+  .contact-form textarea { width:100%; min-height:110px; resize:vertical; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:11px 12px; color:var(--text); font-family:'Sora',sans-serif; font-size:13px; }
+  .contact-form textarea:focus { outline:none; border-color:var(--accent); }
+  .form-ok { background:rgba(59,232,176,0.1); border:1px solid rgba(59,232,176,0.35); border-radius:12px; padding:14px; font-size:12.5px; color:var(--accent); line-height:1.6; }
+
+  /* AI LAB */
+  .lab-head { display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:8px; }
+  .lab-head img { width:110px; height:auto; border-radius:16px; border:2px solid var(--border); }
+  .lab-tabs { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin:22px 0; }
+  .lab-tab { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:99px; padding:9px 18px; font-family:'Sora',sans-serif; font-size:12px; font-weight:600; cursor:pointer; }
+  .lab-tab.active { background:var(--accent); color:#000; border-color:var(--accent); }
+  .lab-panel { max-width:640px; margin:0 auto; background:var(--card); border:1px solid var(--border); border-radius:18px; padding:22px; }
+  .lab-panel h3 { font-size:15px; color:var(--accent); margin-bottom:6px; }
+  .lab-panel > p { color:var(--muted); font-size:12.5px; line-height:1.6; margin-bottom:14px; }
+  .lab-chat { height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:12px; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,0.02); }
+  .input-row { display:flex; gap:8px; margin-top:12px; }
+  input,select,textarea { font-family:'Sora',sans-serif; }
+  .input-row input,.form-field input,.form-field select { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; }
+  .input-row input { flex:1; }
+  .input-row input:focus,.form-field input:focus,.form-field select:focus { outline:none; border-color:var(--accent); }
+  .voice-box { text-align:center; }
+  .voice-face { width:150px; height:auto; border-radius:18px; border:3px solid var(--accent); margin:6px auto 14px; display:block; }
+  .voice-face.talking { animation:memberPulse 1s infinite; }
+  .response-box { text-align:left; margin-top:16px; padding:14px 16px; border:1px solid var(--border); border-radius:12px; font-size:13px; line-height:1.6; background:rgba(255,255,255,0.03); min-height:74px; }
+  .response-box strong { color:var(--accent); }
+  .products { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .product { border:1px solid var(--border); border-radius:14px; padding:16px; text-align:center; background:rgba(255,255,255,0.02); }
+  .product h4 { font-size:13px; margin-bottom:6px; } .product p { font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5; }
+  .toast { position:fixed; bottom:100px; right:24px; z-index:1000; max-width:320px; background:var(--accent); color:#000; padding:14px 16px; border-radius:12px; font-size:12.5px; font-weight:600; line-height:1.5; opacity:0; transform:translateY(40px); pointer-events:none; transition:.35s; white-space:pre-wrap; }
+  .toast.show { opacity:1; transform:translateY(0); }
+
+  /* GUARDIAN SECTION */
+  .guardian { max-width:1240px; margin:0 auto; padding:16px 24px 70px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
+  .guardian h2 { font-size:clamp(1.4rem,2.4vw,1.9rem); margin:10px 0 14px; letter-spacing:-.5px; }
+  .guardian-copy p { color:var(--muted); font-size:13px; line-height:1.7; max-width:28rem; }
+  .guardian-copy .btn { margin-top:18px; }
+  .chat-mock { display:flex; flex-direction:column; gap:10px; }
+  .chat-bubble { padding:11px 15px; border-radius:14px; font-size:12.5px; max-width:85%; line-height:1.5; font-family:'DM Mono',monospace; }
+  .bubble-in { background:rgba(255,255,255,0.04); border:1px solid var(--border); align-self:flex-start; }
+  .bubble-out { background:var(--accent); color:#000; align-self:flex-end; font-weight:600; }
+
+  .cta { text-align:center; padding:72px 24px; border-top:1px solid var(--border); }
+  .cta h2 { font-size:clamp(1.6rem,3vw,2.2rem); letter-spacing:-.5px; }
+  .cta p { color:var(--muted); font-size:13px; margin:10px 0 22px; }
+
+  /* FOOTER */
+  footer { border-top:1px solid var(--border); padding:40px 24px 26px; }
+  .foot-inner { max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:30px; }
+  footer .logo { margin-bottom:10px; font-size:18px; }
+  footer p { font-size:12px; color:var(--muted); line-height:1.7; }
+  footer h4 { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+  footer ul { list-style:none; display:flex; flex-direction:column; gap:9px; }
+  footer li a { font-size:12.5px; text-decoration:none; color:var(--text); cursor:pointer; } footer li a:hover { color:var(--accent); }
+  .copy { max-width:1240px; margin:28px auto 0; padding-top:18px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); text-align:center; line-height:1.8; }
+
+  /* CHAT BUBBLES */
+  .message { display:flex; align-items:flex-end; gap:6px; max-width:90%; }
+  .message.user { align-self:flex-end; flex-direction:row-reverse; } .message.ai { align-self:flex-start; }
+  .avatar { font-size:14px; flex-shrink:0; margin-bottom:2px; }
+  .bubble { padding:9px 12px; border-radius:12px; font-size:12px; line-height:1.5; font-family:'DM Mono',monospace; white-space:pre-wrap; word-break:break-word; }
+  .message.user .bubble { background:var(--accent); color:#000; font-weight:600; border-bottom-right-radius:4px; }
+  .message.ai .bubble { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-bottom-left-radius:4px; }
+  .dots::after { content:'.'; animation:dots 1.2s infinite steps(1); }
+  @keyframes dots { 0%{content:'.';} 33%{content:'..';} 66%{content:'...';} }
+
+  /* AUTH MODAL */
+  .modal-overlay { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.72); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .2s ease; }
+  .modal-overlay.open { opacity:1; pointer-events:auto; }
+  .modal-card { width:100%; max-width:380px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px 26px 30px; box-shadow:0 24px 60px rgba(0,0,0,0.6),0 0 40px rgba(59,232,176,0.08); max-height:92vh; overflow-y:auto; }
+  .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .modal-title { font-size:16px; font-weight:700; }
+  .modal-close { background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:18px; padding:4px; }
+  .auth-tabs { display:flex; gap:6px; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .auth-tab { flex:1; padding:8px 0; border-radius:8px; border:none; cursor:pointer; background:transparent; color:var(--muted); font-family:'Sora',sans-serif; font-size:12px; font-weight:600; }
+  .auth-tab.active { background:var(--accent); color:#000; }
+  .auth-form { display:flex; flex-direction:column; gap:12px; }
+  .form-field label { display:block; font-size:9px; color:var(--muted); letter-spacing:.8px; text-transform:uppercase; margin-bottom:6px; }
+  .form-field input,.form-field select { width:100%; }
+  .form-field select option { background:#111; }
+  .consent { display:flex; gap:8px; font-size:11px; color:var(--muted); line-height:1.5; align-items:flex-start; }
+  .consent input { margin-top:3px; accent-color:turquoise; }
+  .auth-note { font-size:11px; color:var(--muted); text-align:center; margin-top:14px; }
+  .auth-note a { color:var(--accent); font-weight:600; cursor:pointer; }
+  .auth-success { text-align:center; padding:10px 0; }
+  .auth-success h3 { color:var(--accent); margin-bottom:8px; }
+  .auth-success p { color:var(--muted); font-size:12.5px; line-height:1.6; }
+
+  /* GUARDIAN WIDGET */
+  #chatWidget { position:fixed; bottom:24px; right:24px; z-index:999; }
+  #chatToggle { width:56px; height:56px; background:var(--accent); color:#000; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; position:relative; box-shadow:0 8px 24px rgba(59,232,176,0.25),0 0 0 1px rgba(59,232,176,0.4); transition:transform .2s ease; }
+  #chatToggle:hover { transform:scale(1.08); }
+  #chatToggle::after { content:''; position:absolute; top:2px; right:2px; width:10px; height:10px; border-radius:50%; background:var(--accent2); border:2px solid #000; }
+  #chatToggle.no-alert::after { display:none; }
+  #chatWindow { position:absolute; bottom:72px; right:0; width:320px; height:440px; background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,0.6),0 0 40px rgba(59,232,176,0.08); display:flex; flex-direction:column; overflow:hidden; transform:scale(.9) translateY(8px); opacity:0; pointer-events:none; transition:transform .2s ease,opacity .2s ease; }
+  #chatWindow.open { transform:scale(1) translateY(0); opacity:1; pointer-events:auto; }
+  .chat-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--accent); background:rgba(59,232,176,0.04); }
+  .chat-sub { margin-left:auto; font-size:9px; font-weight:600; background:rgba(59,232,176,0.15); border:1px solid rgba(59,232,176,0.3); padding:3px 8px; border-radius:99px; }
+  .chat-box { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+  .chat-quickreplies { display:flex; gap:6px; flex-wrap:wrap; padding:0 12px 10px; }
+  .qr-btn { background:transparent; border:1px solid rgba(59,232,176,0.35); color:var(--accent); font-family:'DM Mono',monospace; font-size:10px; padding:5px 10px; border-radius:99px; cursor:pointer; }
+  .qr-btn:hover { background:rgba(59,232,176,0.1); }
+  .chat-input-area { display:flex; gap:8px; padding:12px; border-top:1px solid var(--border); background:#000; }
+  .chat-input-area input { flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:9px 12px; color:var(--text); font-size:12px; }
+  .chat-input-area input:focus { outline:none; border-color:var(--accent); }
+  .chat-input-area button { background:var(--accent); color:#000; border:none; border-radius:10px; padding:9px 14px; font-family:'Sora',sans-serif; font-size:12px; font-weight:700; cursor:pointer; }
+
+  /* RESPONSIVE */
+  @media (max-width:1100px) { .nav-links { display:none; } .menu-btn { display:block; } .nav-links.open { display:flex; flex-direction:column; position:absolute; top:100%; left:0; right:0; background:rgba(0,0,0,0.96); padding:16px 24px 22px; gap:14px; border-bottom:1px solid var(--border); font-size:14px; } }
+  @media (max-width:1000px) { .pricing-grid,.g4,.roadmap { grid-template-columns:1fr 1fr; } .g5 { grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:880px) {
+    .hero,.guardian,.about-grid,.contact-grid { grid-template-columns:1fr; }
+    .hero { padding-top:28px; } .hero-visual { order:-1; display:flex; justify-content:center; }
+    .steps,.g3 { grid-template-columns:1fr 1fr; } .products { grid-template-columns:1fr; }
+    .foot-inner { grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:560px) { .g2,.g3,.g4,.g5,.pricing-grid,.roadmap,.steps,.foot-inner { grid-template-columns:1fr; } .g5 { grid-template-columns:1fr 1fr; } }
+  @media (max-width:420px) { .nav-auth .btn-ghost { display:none; } #chatWindow { width:calc(100vw - 32px); right:-8px; height:68vh; max-height:480px; } }
+  @media (prefers-reduced-motion:reduce) { .proc-dot,.pin-member,.voice-face.talking { animation:none; } html { scroll-behavior:auto; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-inner">
+    <a href="#home" class="logo">🛡️ Safe<span>Zone</span></a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#about">About</a><a href="#features">Features</a><a href="#how">How it works</a><a href="#who">Who it's for</a>
+      <a href="#pricing">Pricing</a><a href="#app">The App</a><a href="#tech">Technology</a><a href="#ailab">AI Lab</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+    </nav>
+    <div class="nav-auth">
+      <button class="btn btn-ghost btn-small" onclick="openAuth('login')">Log in</button>
+      <button class="btn btn-primary btn-small" onclick="openAuth('signup')">Sign up</button>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" onclick="toggleMenu()">☰</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authOverlay" onclick="if(event.target===this) closeAuth()">
+  <div class="modal-card">
+    <div class="modal-head"><span class="modal-title" id="authTitle">Welcome back</span><button class="modal-close" onclick="closeAuth()" aria-label="Close">✕</button></div>
+    <div id="authBody">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchAuth('login')">Log in</button>
+        <button class="auth-tab" id="tabSignup" onclick="switchAuth('signup')">Sign up</button>
+      </div>
+      <form class="auth-form" id="formLogin" onsubmit="return handleAuthSubmit(event,'login')">
+        <div class="form-field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" placeholder="you@example.com" required></div>
+        <div class="form-field"><label for="loginPassword">Password</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
+        <button type="submit" class="btn btn-primary">Log in</button>
+        <div class="auth-note">No account? <a onclick="switchAuth('signup')">Sign up</a></div>
+      </form>
+      <form class="auth-form hidden" id="formSignup" onsubmit="return handleAuthSubmit(event,'signup')">
+        <div class="form-field"><label for="signupName">Full name</label><input type="text" id="signupName" placeholder="Your name" required></div>
+        <div class="form-field"><label for="signupEmail">Email</label><input type="email" id="signupEmail" placeholder="you@example.com" required></div>
+        <div class="form-field"><label for="signupPassword">Password</label><input type="password" id="signupPassword" placeholder="At least 8 characters" minlength="8" required></div>
+        <div class="form-field"><label for="signupPlan">Plan</label>
+          <select id="signupPlan"><option>Free</option><option>Family</option><option>Premium</option><option>Business</option></select></div>
+        <label class="consent"><input type="checkbox" required> I will only track people who have agreed to it, or whose legal guardian I am (POPIA).</label>
+        <button type="submit" class="btn btn-primary">Create account</button>
+        <div class="auth-note">Already registered? <a onclick="switchAuth('login')">Log in</a></div>
+      </form>
+    </div>
+    <div class="auth-success hidden" id="authSuccess">
+      <h3 id="authSuccessTitle">You're in 🎉</h3><p id="authSuccessText"></p>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="closeAuth()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- 1. HOME -->
+<section class="hero" id="home">
+  <div class="hero-copy">
+    <div class="hero-logo"><div class="mark">🛡️</div><div class="word">Safe<span>Zone</span></div></div>
+    <h1>Keeping the people who matter most <span class="accent">within reach.</span></h1>
+    <p class="lede">SafeZone pairs a smartwatch and a smart tag with a simple app, so you always know where your loved ones are. Live location, safe-zone alerts, an SOS that reaches you first, and an AI Guardian assistant for children, elderly relatives, lone workers and valuables.</p>
+    <div class="hero-actions">
+      <a href="#how" class="btn btn-outline btn-large">Learn More</a>
+      <a href="#pricing" class="btn btn-primary btn-large" onclick="openAuth('signup');return true;">Get Started</a>
+    </div>
+    <div class="store-row">
+      <button class="store-badge" onclick="showToast('Demo badge: the SafeZone app is not on Google Play yet.')"><span class="ico">▶</span><span><small>GET IT ON</small><b>Google Play</b></span></button>
+      <button class="store-badge" onclick="showToast('Demo badge: the SafeZone app is not on the App Store yet.')"><span class="ico"></span><span><small>DOWNLOAD ON THE</small><b>App Store</b></span></button>
+    </div>
+    <span class="demo-tag">DEMO BADGES · APP COMING SOON · NO SMARTPHONE NEEDED FOR THE WEARER</span>
+  </div>
+  <div class="hero-visual">
+    <div class="phone-wrap">
+      <div class="phone-label">Live Monitor</div>
+      <div class="phone"><div class="phone-screen">
+        <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="screen-header"><div class="screen-title">🗺️ Live Monitor</div><div class="screen-step">HOME ZONE · ACTIVE</div></div>
+        <div class="screen-body">
+          <div class="map-widget"><div class="map-grid"></div>
+            <div class="zone-ring" style="width:90px;height:90px;left:22%;top:25%"></div>
+            <svg viewBox="0 0 220 100" style="position:absolute;inset:0;width:100%;height:100%"><line x1="77" y1="70" x2="150" y2="30" stroke="rgba(59,232,176,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/></svg>
+            <div class="map-pin pin-you" style="top:60%;left:35%"></div><div class="map-pin pin-member" style="top:25%;left:65%"></div>
+            <div class="map-label">GPS LIVE</div></div>
+          <div class="map-legend"><div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Guardian</div><div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Member</div><div class="legend-item" style="margin-left:auto">32m apart</div></div>
+          <div><span class="status-badge">● SAFE — Within 50m</span></div>
+          <div class="processing"><div class="proc-dot"></div><div class="proc-text">Refreshing location…</div></div>
+          <div class="list-row"><span class="av">🧒</span><span><b>Thabo</b><small>Watch 61% · Tag 74%</small></span><span class="end">LIVE</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. ABOUT -->
+<div class="section-divider">About SafeZone</div>
+<section class="section" id="about">
+  <h2 class="section-title">A safety net you can wear, clip on and carry</h2>
+  <p class="section-sub">SafeZone is a personal safety platform made up of a smartwatch, a smart tag and a mobile app, backed by an AI assistant.</p>
+  <div class="about-grid">
+    <div>
+      <h3>What SafeZone is</h3>
+      <p>SafeZone connects an off-the-shelf smartwatch and smart tag to one app. You draw safe zones on a map, and the moment someone leaves them, presses SOS or loses signal, you are told. No smartphone is needed for the person wearing the watch.</p>
+      <h3>The problem it solves</h3>
+      <p>Families, carers and employers can't be everywhere. Children walk to school alone, elderly relatives wander, and lone workers face risk with nobody checking in. Phone calls and messages only work if the person can answer. SafeZone tells you what's happening without needing them to do anything.</p>
+      <h3>Why it was created</h3>
+      <p>SafeZone began as a first-year ICT project at Tshwane University of Technology. We wanted to build something real: a product that combines hardware, software and AI to solve a problem we and our families see every day.</p>
+      <h3>Why it matters in South Africa</h3>
+      <p>Many families live far from workplaces and schools, and rely on walking, taxis and shared transport. High levels of violent crime and thousands of missing-person reports each year mean peace of mind isn't a luxury. We are building for local needs: SMS fallback for patchy data, rand pricing, and POPIA-aware consent.</p>
+    </div>
+    <div class="grid">
+      <div class="card quote-card"><p class="big-q">"Know they're safe, wherever they are."</p><p style="margin-top:10px">Our promise, in six words.</p></div>
+      <div class="card"><span class="emoji">🎯</span><h3>Our mission</h3><p>Make personal safety affordable and simple for every South African household, school and workplace.</p></div>
+      <div class="card"><span class="emoji">🎓</span><h3>Built by students</h3><p>A TUT ICT First Year project, treated as a real product from day one.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. FEATURES -->
+<div class="section-divider">Features</div>
+<section class="section" id="features">
+  <h2 class="section-title">Everything you need to know they're safe</h2>
+  <p class="section-sub">Core safety features are free. Advanced features come with paid plans.</p>
+  <div class="grid g5" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+    <div class="card feature-card"><span class="emoji">📍</span><h3>Live location tracking</h3><p>See where people and items are in real time, updated every few seconds while moving.</p></div>
+    <div class="card feature-card"><span class="emoji">🟢</span><h3>Safe-zone (geofence) alerts</h3><p>Draw zones for home, school or work and get alerted when someone enters or leaves.</p></div>
+    <div class="card feature-card featured"><span class="emoji">🆘</span><h3>SOS emergency button</h3><p>Hold for 3 seconds to send live location and an alarm. Always free.</p></div>
+    <div class="card feature-card"><span class="emoji">🧓</span><h3>Fall detection <span class="tag">PREMIUM</span></h3><p>Motion sensors detect a hard fall and automatically alert your emergency contacts.</p></div>
+    <div class="card feature-card"><span class="emoji">🛣️</span><h3>Route history</h3><p>Replay where someone has been, with 30-day history on Family and unlimited on Premium.</p></div>
+    <div class="card feature-card"><span class="emoji">👨‍👩‍👧</span><h3>Family sharing</h3><p>Add several guardians so everyone sees the same alerts, with roles for each person.</p></div>
+    <div class="card feature-card"><span class="emoji">🏷️</span><h3>Smart tag support</h3><p>Clip a tag to a school bag, bike, keys or a pet's collar and find it on the map.</p></div>
+    <div class="card feature-card"><span class="emoji">⌚</span><h3>Smartwatch support</h3><p>Works with off-the-shelf cellular smartwatches, so the wearer needs no phone.</p></div>
+    <div class="card feature-card"><span class="emoji">📲</span><h3>Emergency contact notifications</h3><p>If you can't respond, trusted contacts get an SMS and call-back request.</p></div>
+    <div class="card feature-card"><span class="emoji">🤖</span><h3>AI Guardian Assistant</h3><p>Ask in plain language where someone was last seen or what an alert means.</p></div>
+  </div>
+</section>
+
+<!-- 4. HOW IT WORKS -->
+<div class="section-divider">How it works</div>
+<section class="section" id="how">
+  <h2 class="section-title">Six steps from sign-up to peace of mind</h2>
+  <p class="section-sub">Setup takes about five minutes. No technical skills needed.</p>
+  <ol class="steps">
+    <li><h3>Create an account</h3><p>Sign up in the app with your email and choose a plan. Free is always available.</p></li>
+    <li><h3>Add family members or devices</h3><p>Pair a watch or smart tag by holding it near your phone. Each person gets a profile.</p></li>
+    <li><h3>Set safe zones</h3><p>Draw zones on the map for home, school or work, and choose a safe distance.</p></li>
+    <li><h3>Receive alerts</h3><p>If someone leaves a safe zone, goes too far or the battery runs low, you get a push alert, with SMS as a backup.</p></li>
+    <li><h3>Use SOS in an emergency</h3><p>The wearer holds the SOS button for 3 seconds. Live location and an alarm are sent at once.</p></li>
+    <li><h3>Trusted contacts are notified</h3><p>Your chosen emergency contacts get the alert too, so help can reach them even if you can't.</p></li>
+  </ol>
+</section>
+
+<!-- 5. WHO IT'S FOR -->
+<div class="section-divider">Who it's for</div>
+<section class="section" id="who">
+  <h2 class="section-title">One platform for everyone who needs a safety net</h2>
+  <p class="section-sub">SafeZone started with children, but the same watch, tag and app protect anyone who benefits from a little extra care.</p>
+  <div class="grid g4">
+    <div class="card"><span class="emoji">🧒</span><h3>Parents &amp; children</h3><p>Know they got to school and home safely, without giving a young child a smartphone.</p></div>
+    <div class="card"><span class="emoji">👵</span><h3>Elderly relatives</h3><p>Fall detection and wander alerts give independent seniors and their families peace of mind.</p></div>
+    <div class="card"><span class="emoji">♿</span><h3>People with disabilities</h3><p>A discreet way for carers to know someone is safe and to get help quickly if needed.</p></div>
+    <div class="card"><span class="emoji">🎓</span><h3>Students</h3><p>Share your trip with friends or family when travelling at night between campus and home.</p></div>
+    <div class="card"><span class="emoji">👩</span><h3>Women travelling alone</h3><p>One-press SOS and live trip sharing for taxis, e-hailing and late walks.</p></div>
+    <div class="card"><span class="emoji">🦺</span><h3>Lone workers</h3><p>Security guards, farm workers and drivers get check-ins and an SOS button.</p></div>
+    <div class="card"><span class="emoji">🐕</span><h3>Pet owners</h3><p>Clip a tag onto a collar and find your pet quickly when they wander off.</p></div>
+    <div class="card"><span class="emoji">🏢</span><h3>Businesses</h3><p>Schools, security firms, farms and fleets can monitor many people from one dashboard.</p></div>
+  </div>
+</section>
+
+<!-- 6. PRICING -->
+<div class="section-divider">Subscription plans</div>
+<section class="section" id="pricing">
+  <h2 class="section-title">Simple plans for every household and team</h2>
+  <p class="section-sub">Start free. Basic SOS and safe-zone alerts are never locked behind a paywall.</p>
+  <div class="billing-toggle">
+    <span id="lblMonthly" style="color:var(--text)">Monthly</span>
+    <div class="switch" id="billingSwitch" role="switch" aria-checked="false" tabindex="0" onclick="toggleBilling()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBilling();}"></div>
+    <span id="lblAnnual">Annual</span><span class="save-pill">2 months free</span>
+  </div>
+  <div class="pricing-grid">
+    <div class="plan"><h3>Free</h3><div class="for">Try SafeZone with one person or item.</div>
+      <div class="price">R0<small> /month</small></div><div class="billed">Free forever</div>
+      <ul><li>Track 1 person or tag</li><li>Live location</li><li>Safe-zone alerts</li><li>Basic SOS alert</li><li class="off">SMS fallback</li><li class="off">Route history</li><li class="off">Fall detection</li><li class="off">AI Guardian Assistant</li></ul>
+      <button class="btn btn-outline" onclick="openAuth('signup','Free')">Start free</button></div>
+    <div class="plan popular"><span class="badge">MOST POPULAR</span><h3>Family</h3><div class="for">Parents and families looking after several people.</div>
+      <div class="price"><span class="amt" data-m="99" data-a="82">R99</span><small> /month</small></div><div class="billed" data-m="Billed monthly" data-a="R990 billed yearly">Billed monthly</div>
+      <ul><li>Up to 5 people or tags</li><li>Live location &amp; safe zones</li><li>SOS with SMS fallback</li><li>30-day route history</li><li>Family sharing</li><li>Low-battery &amp; offline alerts</li><li>AI Guardian Assistant</li><li class="off">Fall detection</li></ul>
+      <button class="btn btn-primary" onclick="openAuth('signup','Family')">Choose Family</button></div>
+    <div class="plan"><h3>Premium</h3><div class="for">Extra care for elderly relatives and special needs.</div>
+      <div class="price"><span class="amt" data-m="199" data-a="166">R199</span><small> /month</small></div><div class="billed" data-m="Billed monthly" data-a="R1,990 billed yearly">Billed monthly</div>
+      <ul><li>Everything in Family</li><li>Up to 10 people or tags</li><li>Fall detection</li><li>Unlimited route history &amp; replay</li><li>Emergency contact notifications</li><li>Priority alerts</li><li>Smart tag &amp; smartwatch support</li></ul>
+      <button class="btn btn-outline" onclick="openAuth('signup','Premium')">Choose Premium</button></div>
+    <div class="plan"><h3>Business</h3><div class="for">Security firms, schools, farms and fleets.</div>
+      <div class="price"><span class="amt" data-m="149" data-a="124">R149</span><small> /seat/month</small></div><div class="billed" data-m="Billed monthly, per seat" data-a="R1,490 per seat, billed yearly">Billed monthly, per seat</div>
+      <ul><li>Team dashboard for many people</li><li>Group tracking &amp; geofences</li><li>Lone-worker check-ins</li><li>Reports &amp; exports</li><li>Admin roles &amp; consent records</li><li>Fall detection included</li><li>Dedicated support</li></ul>
+      <button class="btn btn-outline" onclick="openAuth('signup','Business')">Choose Business</button></div>
+  </div>
+  <p class="pricing-note">Example pricing for demonstration. Prices in South African rand and not final.<br>Tracking adults requires their consent, in line with POPIA.</p>
+</section>
+
+<!-- 7. THE MOBILE APP -->
+<div class="section-divider">The mobile app</div>
+<section class="section" id="app">
+  <h2 class="section-title">A clean, simple app for Android and iPhone</h2>
+  <p class="section-sub">Seven key screens. These are design mock-ups for the presentation, not a working app yet.</p>
+  <div class="mock-row">
+
+    <div class="phone-wrap"><div class="phone-label">1 · Login</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-body" style="justify-content:center;gap:12px">
+        <div class="center" style="font-size:38px">🛡️</div><div class="center" style="font-weight:800;font-size:18px;color:var(--accent)">Safe<span style="color:var(--text)">Zone</span></div>
+        <div class="center tiny muted">Know they're safe.</div>
+        <div class="field"><div class="field-label">Email</div><div class="field-value">you@example.com</div></div>
+        <div class="field"><div class="field-label">Password</div><div class="field-value">••••••••</div></div>
+        <div class="mini-btn">Log in</div><div class="mini-btn out">Create account</div>
+        <div class="center tiny muted">Forgot password?</div>
+      </div></div></div></div>
+
+    <div class="phone-wrap"><div class="phone-label">2 · Home dashboard</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-header"><div class="screen-title">Hi, Zweli 👋</div><div class="screen-step">3 PEOPLE · ALL SAFE</div></div>
+      <div class="screen-body">
+        <div class="list-row"><span class="av">🧒</span><span><b>Thabo</b><small>At school · 2 min ago</small></span><span class="end">SAFE</span></div>
+        <div class="list-row"><span class="av">👵</span><span><b>Gogo</b><small>At home · 5 min ago</small></span><span class="end">SAFE</span></div>
+        <div class="list-row"><span class="av">🎒</span><span><b>School bag</b><small>With Thabo · tag 74%</small></span><span class="end">OK</span></div>
+        <div class="field"><div class="field-label">Today</div><div class="field-value" style="font-size:10px">2 zone alerts · 0 SOS</div></div>
+        <div class="mini-btn">+ Add person or device</div>
+      </div>
+      <div class="tabbar"><span class="on">🏠</span><span>🗺️</span><span>🔔</span><span>👤</span></div></div></div></div>
+
+    <div class="phone-wrap"><div class="phone-label">3 · Live map</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-header"><div class="screen-title">🗺️ Live map</div><div class="screen-step">THABO · UPDATED 3s AGO</div></div>
+      <div class="screen-body">
+        <div class="map-widget tall"><div class="map-grid"></div>
+          <div class="zone-ring" style="width:120px;height:120px;left:18%;top:20%"></div>
+          <svg viewBox="0 0 208 250" style="position:absolute;inset:0;width:100%;height:100%"><path d="M40 210 Q70 160 100 150 T150 70" fill="none" stroke="rgba(249,115,22,0.6)" stroke-width="2" stroke-dasharray="5,4"/></svg>
+          <div class="map-pin pin-you" style="top:82%;left:18%"></div><div class="map-pin pin-member" style="top:26%;left:70%"></div>
+          <div class="map-label">GPS LIVE</div></div>
+        <div class="list-row"><span class="av">🧒</span><span><b>Thabo</b><small>Oak Street · 61% battery</small></span><span class="end">32m</span></div>
+        <div><span class="status-badge">● INSIDE SCHOOL ZONE</span></div>
+      </div>
+      <div class="tabbar"><span>🏠</span><span class="on">🗺️</span><span>🔔</span><span>👤</span></div></div></div></div>
+
+    <div class="phone-wrap"><div class="phone-label">4 · Safe-zone settings</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-header"><div class="screen-title">🟢 Safe zones</div><div class="screen-step">EDIT ZONE</div></div>
+      <div class="screen-body">
+        <div class="map-widget" style="height:90px"><div class="map-grid"></div><div class="zone-ring" style="width:70px;height:70px;left:38%;top:15%"></div><div class="map-pin pin-you" style="top:45%;left:52%"></div></div>
+        <div class="field"><div class="field-label">Zone name</div><div class="field-value">Home</div></div>
+        <div class="field"><div class="field-label">Safe distance</div><div class="field-value">50 m</div><div class="slider"><i></i></div></div>
+        <div class="list-row">Alert when leaving<span class="toggle"></span></div>
+        <div class="list-row">Alert when arriving<span class="toggle"></span></div>
+        <div class="list-row">Night mode (22:00–05:00)<span class="toggle off"></span></div>
+        <div class="mini-btn">Save zone</div>
+      </div></div></div></div>
+
+    <div class="phone-wrap"><div class="phone-label">5 · SOS</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-header"><div class="screen-title" style="color:var(--alert)">🆘 SOS</div><div class="screen-step">HOLD FOR 3 SECONDS</div></div>
+      <div class="screen-body" style="align-items:center">
+        <div class="sos-big">SOS</div>
+        <div class="center tiny muted">Sends your live location and an alarm to your guardians and emergency contacts.</div>
+        <div class="field" style="width:100%"><div class="field-label">Will notify</div><div class="field-value" style="font-size:10px">Mom · Dad · Uncle Sipho</div></div>
+        <div class="mini-btn out" style="width:100%">Cancel</div>
+      </div></div></div></div>
+
+    <div class="phone-wrap"><div class="phone-label">6 · Profile</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-header"><div class="screen-title">👤 Profile</div><div class="screen-step">FAMILY PLAN</div></div>
+      <div class="screen-body">
+        <div class="avatar-lg">🙂</div><div class="center" style="font-weight:700;font-size:13px">Zweli</div><div class="center tiny muted">zweli@example.com</div>
+        <div class="list-row">👨‍👩‍👧 Family members<span class="end">3 / 5</span></div>
+        <div class="list-row">☎️ Emergency contacts<span class="end">3</span></div>
+        <div class="list-row">⭐ Plan<span class="end">Family</span></div>
+        <div class="list-row">🔒 Privacy &amp; consent<span class="end">›</span></div>
+        <div class="list-row">🚪 Log out<span class="end">›</span></div>
+      </div>
+      <div class="tabbar"><span>🏠</span><span>🗺️</span><span>🔔</span><span class="on">👤</span></div></div></div></div>
+
+    <div class="phone-wrap"><div class="phone-label">7 · Notifications</div><div class="phone"><div class="phone-screen">
+      <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+      <div class="screen-header"><div class="screen-title">🔔 Notifications</div><div class="screen-step">TODAY</div></div>
+      <div class="screen-body">
+        <div class="list-row"><span class="av">⚠️</span><span><b>Thabo left School zone</b><small>14:32 · heading to Oak Street</small></span></div>
+        <div class="list-row"><span class="av">✅</span><span><b>Thabo arrived home</b><small>14:55 · Home zone</small></span></div>
+        <div class="list-row"><span class="av">🔋</span><span><b>Watch battery 20%</b><small>13:10 · charge soon</small></span></div>
+        <div class="list-row"><span class="av">📶</span><span><b>Gogo's watch offline</b><small>09:02 · SMS sent</small></span></div>
+        <div class="list-row"><span class="av">🤖</span><span><b>Guardian tip</b><small>08:00 · Weekly summary ready</small></span></div>
+      </div>
+      <div class="tabbar"><span>🏠</span><span>🗺️</span><span class="on">🔔</span><span>👤</span></div></div></div></div>
+
+  </div>
+  <p class="scroll-hint">← swipe or scroll to see all screens →</p>
+</section>
+
+<!-- 8. TECHNOLOGY -->
+<div class="section-divider">Technology</div>
+<section class="section" id="tech">
+  <h2 class="section-title">Built on proven, affordable technology</h2>
+  <p class="section-sub">We use off-the-shelf hardware and cloud services so SafeZone can reach families quickly.</p>
+  <div class="grid g4">
+    <div class="card tech-card"><span class="emoji">🛰️</span><h3>GPS</h3><p>Satellite positioning gives accurate outdoor location. Wi-Fi and cell towers help indoors.</p></div>
+    <div class="card tech-card"><span class="emoji">🔵</span><h3>Bluetooth</h3><p>Pairs the watch and tag with your phone and detects when they are close or far apart.</p></div>
+    <div class="card tech-card"><span class="emoji">🏷️</span><h3>Smart tags</h3><p>Small, battery-powered trackers for bags, keys, bikes and pets.</p></div>
+    <div class="card tech-card"><span class="emoji">☁️</span><h3>Cloud storage</h3><p>Firebase stores locations and alerts securely and syncs them across devices.</p></div>
+    <div class="card tech-card"><span class="emoji">🤖</span><h3>AI assistant</h3><p>The Guardian chatbot is powered by the Claude API and answers in plain language.</p></div>
+    <div class="card tech-card"><span class="emoji">🔐</span><h3>End-to-end encryption</h3><p>Location data is encrypted in transit and at rest, and private messages are end-to-end encrypted.</p></div>
+    <div class="card tech-card"><span class="emoji">📱</span><h3>Android &amp; iPhone</h3><p>One cross-platform app, so the whole family can use the phones they already have.</p></div>
+    <div class="card tech-card"><span class="emoji">✉️</span><h3>SMS fallback</h3><p>Twilio sends text alerts when mobile data isn't available.</p></div>
+  </div>
+</section>
+
+<!-- BONUS: STATS -->
+<div class="section-divider">Why it matters</div>
+<section class="section" id="stats">
+  <h2 class="section-title">Personal safety in South Africa, in numbers</h2>
+  <p class="section-sub">Official police figures show why families want a safety net.</p>
+  <div class="grid g4">
+    <div class="card stat"><div class="num">5,181</div><div class="lbl">murders recorded between January and March 2026, roughly 58 a day</div></div>
+    <div class="card stat"><div class="num">3,609</div><div class="lbl">carjackings recorded in the same quarter</div></div>
+    <div class="card stat"><div class="num">+264%</div><div class="lbl">rise in reported kidnappings between 2014/15 (4,692) and 2023/24 (17,061)</div></div>
+    <div class="card stat"><div class="num">2,963</div><div class="lbl">missing children under 18 reunited with their families by SAPS since 2020</div></div>
+  </div>
+  <p class="sources">Sources: <a href="https://businesstech.co.za/news/lifestyle/861217/58-people-murdered-every-day-in-south-africa-these-are-the-deadliest-areas/" target="_blank" rel="noopener">BusinessTech, SAPS Q4 2025/26 crime statistics (May 2026)</a> ·
+    <a href="https://www.protectionweb.co.za/civil-security/18-000-missing-persons-reunited-since-2020/" target="_blank" rel="noopener">ProtectionWeb, citing SAPS (May 2025)</a><br>
+    Statistics are from the sources above and may be updated by SAPS.</p>
+</section>
+
+<!-- BONUS: TESTIMONIALS -->
+<div class="section-divider">Testimonials</div>
+<section class="section" id="testimonials">
+  <h2 class="section-title">What families could say about SafeZone</h2>
+  <p class="section-sub">Demo testimonials. These people and quotes are fictional examples for the presentation.</p>
+  <div class="grid g3">
+    <div class="card t-card"><div class="stars">★★★★★</div><p class="q">"My son walks home from school alone now, and I don't spend the afternoon worrying. I get a message when he arrives."</p><div class="who"><span class="av">👩🏾</span><span><b>Nomsa M.</b><small>Parent · Pretoria (demo)</small></span></div></div>
+    <div class="card t-card"><div class="stars">★★★★★</div><p class="q">"Gogo lives alone and likes her independence. The fall alert gives us peace of mind without taking that away."</p><div class="who"><span class="av">👨🏿</span><span><b>Sipho K.</b><small>Grandson · Polokwane (demo)</small></span></div></div>
+    <div class="card t-card"><div class="stars">★★★★☆</div><p class="q">"Our night guards each wear one. The SOS and check-ins mean we know quickly if something goes wrong on site."</p><div class="who"><span class="av">🧑🏽</span><span><b>Pieter V.</b><small>Farm manager · Limpopo (demo)</small></span></div></div>
+  </div>
+</section>
+
+<!-- BONUS: ROADMAP -->
+<div class="section-divider">Future roadmap</div>
+<section class="section" id="roadmap">
+  <h2 class="section-title">Where SafeZone is going next</h2>
+  <p class="section-sub">A phased plan from prototype to a fully custom device.</p>
+  <div class="roadmap">
+    <div class="rm-card now"><div class="when">PHASE 1 · NOW</div><h3>Prototype</h3><ul><li>Website and app mock-ups</li><li>Android phone simulation</li><li>Guardian AI chatbot demo</li></ul></div>
+    <div class="rm-card"><div class="when">PHASE 2</div><h3>Pilot with real hardware</h3><ul><li>Pair off-the-shelf watch and tag</li><li>Firebase backend and SMS fallback</li><li>Pilot with a few families</li></ul></div>
+    <div class="rm-card"><div class="when">PHASE 3</div><h3>Launch</h3><ul><li>Google Play and App Store release</li><li>Paid plans and Business dashboard</li><li>Fall detection</li></ul></div>
+    <div class="rm-card"><div class="when">PHASE 4</div><h3>Grow</h3><ul><li>Custom SafeZone watch and tag</li><li>Partnerships with schools and security firms</li><li>More South African languages</li></ul></div>
+  </div>
+</section>
+
+<!-- BONUS: PARTNERS -->
+<div class="section-divider">Partners</div>
+<section class="section" id="partners">
+  <h2 class="section-title">Who we want to work with</h2>
+  <p class="section-sub">Partner slots for the presentation. These are the kinds of organisations we plan to approach, not confirmed partners.</p>
+  <div class="grid g4">
+    <div class="partner"><span class="emoji">🏫</span><b>Schools &amp; universities</b><small>Safe routes for learners</small></div>
+    <div class="partner"><span class="emoji">🛡️</span><b>Security companies</b><small>Guard check-ins &amp; response</small></div>
+    <div class="partner"><span class="emoji">📡</span><b>Mobile networks</b><small>Affordable SIMs &amp; data</small></div>
+    <div class="partner"><span class="emoji">🤝</span><b>NGOs &amp; community groups</b><small>Missing-person awareness</small></div>
+  </div>
+</section>
+
+<!-- AI LAB -->
+<div class="section-divider">AI Lab</div>
+<section class="section" id="ailab">
+  <div class="lab-head">
+    <img src="human-face.jpg" alt="AI assistant" onerror="this.remove()">
+    <div><h2 class="section-title" style="margin-bottom:6px;text-align:left">Try our AI demos</h2>
+    <p class="section-sub" style="text-align:left;margin:0">Three AI assistants from JGA Week, ICT First Year and Foundation Unit.</p></div>
+  </div>
+  <div class="lab-tabs" role="tablist">
+    <button class="lab-tab active" data-tab="support" onclick="showTab('support')">💬 Support Bot</button>
+    <button class="lab-tab" data-tab="voice" onclick="showTab('voice')">🎙️ Voice AI</button>
+    <button class="lab-tab" data-tab="tips" onclick="showTab('tips')">💡 Smart Tips</button>
+  </div>
+  <div class="lab-panel" id="tab-support">
+    <h3>Customer Support Bot</h3><p>Ask about shoe sizes, colours, delivery or where we are. The bot only answers questions about the store.</p>
+    <div class="lab-chat" id="supportBox"></div>
+    <div class="input-row"><input id="supportInput" placeholder="Hi, how can I help you?" autocomplete="off"><button class="btn btn-primary btn-small" onclick="handleSupport()">Send</button></div>
+  </div>
+  <div class="lab-panel hidden" id="tab-voice"><div class="voice-box">
+    <h3>Voice AI Assistant</h3><p>Press the button and ask a question about electronics.</p>
+    <img id="voiceFace" class="voice-face" src="human-face.jpg" alt="AI assistant face" onerror="this.style.display='none'">
+    <button id="talkBtn" class="btn btn-primary" onclick="startVoice()">🎙️ Talk to Me</button>
+    <div class="response-box"><p><strong>You said:</strong> <span id="userText"></span></p><p><strong>AI:</strong> <span id="aiResponse"></span></p></div>
+  </div></div>
+  <div class="lab-panel hidden" id="tab-tips" style="max-width:860px">
+    <h3>🛍️ Smart Store</h3><p>Tap a product to get AI-written tips for getting the most out of it.</p>
+    <div class="products">
+      <div class="product"><h4>🎧 Wireless Buds</h4><p>High-quality sound with noise cancellation.</p><button class="btn btn-primary btn-small" onclick="getTips('Wireless Buds')">💡 Get Smart Tips</button></div>
+      <div class="product"><h4>📒 Smart Planner</h4><p>Organize your life with AI-assisted planning.</p><button class="btn btn-primary btn-small" onclick="getTips('Smart Planner')">💡 Get Smart Tips</button></div>
+      <div class="product"><h4>💻 Acer Aspire 5 15</h4><p>Everyday laptop.</p><button class="btn btn-primary btn-small" onclick="getTips('Acer Aspire 5 15')">💡 Get Smart Tips</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARDIAN -->
+<div class="section-divider">Guardian assistant</div>
+<section class="guardian" id="guardian">
+  <div class="guardian-copy">
+    <h2>A calm voice when you need answers fast</h2>
+    <p>Ask the Guardian chatbot where someone was last seen, what a distance alert meant, or what to do next, in plain language, any time.</p>
+    <button class="btn btn-primary" onclick="openChatFromPage()">Chat with Guardian</button>
+  </div>
+  <div class="chat-mock">
+    <div class="chat-bubble bubble-in">Thabo crossed the 50m safe distance 4 minutes ago, heading toward Oak Street.</div>
+    <div class="chat-bubble bubble-out">Is that on his usual route to school?</div>
+    <div class="chat-bubble bubble-in">Yes, it matches his weekday walk. Battery at 61%.</div>
+  </div>
+</section>
+
+<!-- 9. FAQ -->
+<div class="section-divider">FAQs</div>
+<section class="section" id="faq">
+  <h2 class="section-title">Frequently asked questions</h2>
+  <p class="section-sub">Can't find your answer? Use the contact form below.</p>
+  <div class="faq">
+    <details><summary>Does SafeZone work offline?</summary><p>The watch and tag keep working when your phone is offline, because the watch uses its own cellular connection. If the watch has no data, alerts fall back to SMS. In places with no network at all, the last known location is saved and shown as soon as signal returns.</p></details>
+    <details><summary>How accurate is location tracking?</summary><p>Outdoors with a clear view of the sky, GPS is typically accurate to within a few metres. Indoors, in tall buildings or under heavy tree cover it can be less precise, and SafeZone uses Wi-Fi and cell-tower data to help. The app shows an accuracy circle so you can see how sure the location is.</p></details>
+    <details><summary>Can I track multiple people?</summary><p>Yes. Free covers one person or tag, Family up to five, Premium up to ten, and Business supports teams with a shared dashboard.</p></details>
+    <details><summary>Is my data private?</summary><p>Yes. Location data is encrypted in transit and at rest, and only the guardians you invite can see it. We never sell location data. Tracking an adult needs their consent, in line with POPIA, and they can see who has access.</p></details>
+    <details><summary>What happens if there's no internet?</summary><p>SafeZone sends alerts by SMS instead, so you still hear about SOS presses and zone alerts. The full map and history return when data is available again.</p></details>
+    <details><summary>Does my child need a smartphone?</summary><p>No. The child wears a smartwatch with the smart tag. Only the guardian needs the SafeZone app on a phone.</p></details>
+    <details><summary>Which phones does the app support?</summary><p>SafeZone is planned for both Android and iPhone from a single cross-platform app.</p></details>
+  </div>
+</section>
+
+<!-- 10. CONTACT -->
+<div class="section-divider">Contact</div>
+<section class="section" id="contact">
+  <h2 class="section-title">Get in touch</h2>
+  <p class="section-sub">Questions, partnerships or feedback? We'd love to hear from you. (Demo contact details.)</p>
+  <div class="contact-grid">
+    <div class="card">
+      <div class="contact-line"><span class="ci">✉️</span><span><small>Email</small>hello@safezone.demo</span></div>
+      <div class="contact-line"><span class="ci">📞</span><span><small>Phone (demo number)</small>+27 12 000 0000</span></div>
+      <div class="contact-line"><span class="ci">📍</span><span><small>Based in</small>Tshwane, South Africa</span></div>
+      <div class="socials" aria-label="Social media">
+        <a href="#" onclick="showToast('Demo link: social profiles are not live yet.');return false;" aria-label="Facebook">f</a>
+        <a href="#" onclick="showToast('Demo link: social profiles are not live yet.');return false;" aria-label="X">𝕏</a>
+        <a href="#" onclick="showToast('Demo link: social profiles are not live yet.');return false;" aria-label="Instagram">ig</a>
+        <a href="#" onclick="showToast('Demo link: social profiles are not live yet.');return false;" aria-label="LinkedIn">in</a>
+        <a href="#" onclick="showToast('Demo link: social profiles are not live yet.');return false;" aria-label="YouTube">▶</a>
+      </div>
+    </div>
+    <div class="card">
+      <form class="contact-form" id="contactForm" onsubmit="return submitContact(event)">
+        <div class="form-field"><label for="cName">Name</label><input type="text" id="cName" placeholder="Your name" required></div>
+        <div class="form-field"><label for="cEmail">Email</label><input type="email" id="cEmail" placeholder="you@example.com" required></div>
+        <div class="form-field"><label for="cTopic">Topic</label><select id="cTopic"><option>General question</option><option>Pricing</option><option>Partnership</option><option>Feedback</option></select></div>
+        <div class="form-field"><label for="cMsg">Message</label><textarea id="cMsg" placeholder="How can we help?" required></textarea></div>
+        <button type="submit" class="btn btn-primary">Send message</button>
+      </form>
+      <div class="form-ok hidden" id="contactOk"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Give them room to roam.<br>Give yourself peace of mind.</h2>
+  <p>Start with a free plan and upgrade when you're ready.</p>
+  <a href="#pricing" class="btn btn-primary btn-large">Pick your plan</a>
+  <div class="store-row" style="justify-content:center">
+    <button class="store-badge" onclick="showToast('Demo badge: the SafeZone app is not on Google Play yet.')"><span class="ico">▶</span><span><small>GET IT ON</small><b>Google Play</b></span></button>
+    <button class="store-badge" onclick="showToast('Demo badge: the SafeZone app is not on the App Store yet.')"><span class="ico"></span><span><small>DOWNLOAD ON THE</small><b>App Store</b></span></button>
+  </div>
+</section>
+
+<!-- 11. FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <div><div class="logo">🛡️ Safe<span>Zone</span></div><p>Keeping the people who matter most within reach. A personal safety platform built for South African families, workers and communities.</p></div>
+    <div><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#app">The App</a></li><li><a href="#roadmap">Roadmap</a></li></ul></div>
+    <div><h4>Company</h4><ul><li><a href="#about">About</a></li><li><a onclick="showToast('Demo page: Careers is not live yet.')">Careers</a></li><li><a href="#partners">Partners</a></li><li><a href="#contact">Contact</a></li></ul></div>
+    <div><h4>Help &amp; legal</h4><ul><li><a onclick="showToast('Demo page: Support centre is not live yet.')">Support</a></li><li><a href="#faq">FAQs</a></li><li><a onclick="showToast('Demo page: Privacy Policy is not live yet.')">Privacy Policy</a></li><li><a onclick="showToast('Demo page: Terms of Service is not live yet.')">Terms of Service</a></li></ul></div>
+  </div>
+  <div class="copy">© 2026 SafeZone. All rights reserved.</div>
+</footer>
+</div>
+
+<div class="toast" id="toast"><span id="toastText"></span></div>
+
+<!-- GUARDIAN WIDGET -->
+<div id="chatWidget">
+  <div id="chatToggle" onclick="toggleChat()">🛡️</div>
+  <div id="chatWindow">
+    <div class="chat-header">🛡️ Guardian <span class="chat-sub">● ONLINE</span></div>
+    <div id="chatBox" class="chat-box"></div>
+    <div class="chat-quickreplies">
+      <button class="qr-btn" onclick="sendQuick('Where is Thabo right now?')">Where is Thabo?</button>
+      <button class="qr-btn" onclick="sendQuick('What does a safe distance alert mean?')">Distance alert?</button>
+      <button class="qr-btn" onclick="sendQuick('How do I use the SOS button?')">SOS button</button>
+      <button class="qr-btn" onclick="sendQuick('How much battery is left on the watch?')">Battery</button>
+    </div>
+    <div class="chat-input-area"><input id="chatInput" placeholder="Ask Guardian anything…"><button onclick="handleChat()">Send</button></div>
+  </div>
+</div>
+
+<script>
+function toggleMenu(){ document.getElementById('navLinks').classList.toggle('open'); }
+document.addEventListener('click', function(e){
+  var l=document.getElementById('navLinks');
+  if(l && l.classList.contains('open') && e.target.closest('#navLinks a')) l.classList.remove('open');
+});
+function submitContact(e){
+  e.preventDefault();
+  var name=document.getElementById('cName').value.trim().split(' ')[0]||'there';
+  var ok=document.getElementById('contactOk');
+  ok.textContent='Thanks, '+name+'! This is a demo form, so your message was not actually sent. In the real product it would reach our team within one working day.';
+  ok.classList.remove('hidden');
+  document.getElementById('contactForm').classList.add('hidden');
+  return false;
+}
+</script>
+<script src="config.js"></script>
+<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIG — no secrets live in this file.
+   Keys are loaded from config.js (kept on your own computer, NOT uploaded to GitHub).
+   Without config.js the AI Lab uses simple built-in answers instead.
+   ═══════════════════════════════════════════════ */
+const CONFIG = Object.assign({
+  speechKey:    '',
+  speechRegion: 'italynorth',
+  openaiKey:    '',
+  chatUrl:      'https://aiweek2026.openai.azure.com/openai/deployments/gpt-5.1/chat/completions?api-version=2025-03-01-preview'
+}, window.SAFEZONE_CONFIG || {});
+
+const $ = (id) => document.getElementById(id);
+
+/* ── Shared Azure OpenAI helper ── */
+async function callAI(system, history, maxTokens = 600) {
+  const res = await fetch(CONFIG.chatUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': CONFIG.openaiKey },
+    body: JSON.stringify({
+      messages: [{ role: 'system', content: system }, ...history],
+      max_completion_tokens: maxTokens
+    })
+  });
+  if (!res.ok) throw new Error('AI error ' + res.status);
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content?.trim();
+  if (!text) throw new Error('Empty AI reply');
+  return text;
+}
+
+/* ── Chat bubble helper (safe: uses textContent) ── */
+function addBubble(box, sender, text, avatar) {
+  const msg = document.createElement('div');
+  msg.className = 'message ' + sender;
+  const av = document.createElement('span');
+  av.className = 'avatar';
+  av.textContent = avatar || (sender === 'user' ? '🧑' : '🤖');
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  msg.append(av, b);
+  box.appendChild(msg);
+  box.scrollTop = box.scrollHeight;
+  return msg;
+}
+function addTyping(box, avatar) {
+  const m = addBubble(box, 'ai', '', avatar);
+  m.querySelector('.bubble').classList.add('dots');
+  return m;
+}
+
+/* ═══════ AUTH MODAL + PRICING ═══════ */
+function openAuth(mode, plan) {
+  $('authBody').classList.remove('hidden');
+  $('authSuccess').classList.add('hidden');
+  $('authOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  switchAuth(mode || 'login');
+  if (plan) $('signupPlan').value = plan;
+}
+function closeAuth() { $('authOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function switchAuth(mode) {
+  const isLogin = mode === 'login';
+  $('formLogin').classList.toggle('hidden', !isLogin);
+  $('formSignup').classList.toggle('hidden', isLogin);
+  $('tabLogin').classList.toggle('active', isLogin);
+  $('tabSignup').classList.toggle('active', !isLogin);
+  $('authTitle').textContent = isLogin ? 'Welcome back' : 'Create your account';
+}
+function handleAuthSubmit(e, mode) {
+  e.preventDefault();
+  // Demo only: connect this to Firebase Auth when the backend is ready.
+  $('authBody').classList.add('hidden');
+  $('authSuccess').classList.remove('hidden');
+  if (mode === 'signup') {
+    const name = $('signupName').value.trim().split(' ')[0] || 'there';
+    $('authTitle').textContent = 'Account created';
+    $('authSuccessTitle').textContent = 'Welcome, ' + name + ' 🎉';
+    $('authSuccessText').textContent = 'You picked the ' + $('signupPlan').value + ' plan. This is a demo, so no account was actually created.';
+  } else {
+    $('authTitle').textContent = 'Logged in';
+    $('authSuccessTitle').textContent = 'Welcome back 👋';
+    $('authSuccessText').textContent = 'This is a demo, so no real login happened.';
+  }
+  return false;
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAuth(); });
+
+let annual = false;
+function toggleBilling() {
+  annual = !annual;
+  $('billingSwitch').classList.toggle('on', annual);
+  $('billingSwitch').setAttribute('aria-checked', String(annual));
+  $('lblMonthly').style.color = annual ? 'var(--muted)' : 'var(--text)';
+  $('lblAnnual').style.color = annual ? 'var(--text)' : 'var(--muted)';
+  document.querySelectorAll('.amt').forEach(el => { el.textContent = 'R' + (annual ? el.dataset.a : el.dataset.m); });
+  document.querySelectorAll('.billed[data-m]').forEach(el => { el.textContent = annual ? el.dataset.a : el.dataset.m; });
+}
+
+/* ═══════ AI LAB TABS ═══════ */
+function showTab(name) {
+  ['support', 'voice', 'tips'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
+  document.querySelectorAll('.lab-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  if (name === 'support' && !$('supportBox').children.length) {
+    addBubble($('supportBox'), 'ai', 'Hi! Ask me about shoe sizes, colours, delivery or where we are.', '🤖');
+  }
+}
+
+/* ═══════ SUPPORT BOT ═══════ */
+const STORE_KNOWLEDGE = `Business Info:
+- Shoe size: 10
+- Colors available: red, black, white
+- Delivery time: 10 - 15 days
+- Location: Pretoria`;
+
+const SUPPORT_SYSTEM = `You are a helpful clothing store assistant.
+IMPORTANT RULES:
+- ONLY answer questions related to the store, orders, sizes, colors, delivery, or store information
+- DO NOT answer questions outside of this business context
+- If the user asks something unrelated, politely refuse
+You can:
+- Help users choose the correct shoe size from cm
+- Recommend available products from the store knowledge
+- Answer questions about delivery, colors, and availability
+Be friendly, short, and conversational.
+Store Knowledge:
+---------------------
+${STORE_KNOWLEDGE}
+---------------------`;
+
+let supportHistory = [];
+
+function supportFallback(t) {
+  t = t.toLowerCase();
+  if (/(color|colour|red|black|white)/.test(t)) return 'We have the shoes in red, black and white.';
+  if (/(deliver|shipping|how long|arrive)/.test(t)) return 'Delivery takes 10 to 15 days.';
+  if (/(where|location|located|address)/.test(t)) return 'We are based in Pretoria.';
+  if (/(size|cm|fit)/.test(t)) return 'We currently stock size 10. Tell me your foot length in cm and I can help you check the fit.';
+  return 'I can help with sizes, colours, delivery and our location. What would you like to know?';
+}
+
+async function handleSupport() {
+  const input = $('supportInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  const box = $('supportBox');
+  addBubble(box, 'user', text, '🧑');
+  const typing = addTyping(box, '🤖');
+  supportHistory.push({ role: 'user', content: text });
+  if (supportHistory.length > 10) supportHistory.shift();
+  let reply;
+  try {
+    reply = await callAI(SUPPORT_SYSTEM, supportHistory, 600);
+  } catch (err) {
+    console.error(err);
+    reply = supportFallback(text);
+  }
+  typing.remove();
+  supportHistory.push({ role: 'assistant', content: reply });
+  addBubble(box, 'ai', reply, '🤖');
+}
+$('supportInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSupport(); });
+
+/* ═══════ VOICE AI ═══════ */
+const VOICE_SYSTEM = "You are a friendly, conversational voice assistant for an electronics store in south africa. Only answer questions about electronics. If the question is unrelated, say: 'I can only help with electronics - related questions.' Keep responses short and natural, like a real conversation. Allow follow-up questions and maintain context.";
+let voiceHistory = [];
+
+function cleanForSpeech(s) {
+  return s.replace(/[#*_`>]+/g, '').replace(/\s+/g, ' ').trim();
+}
+async function getVoiceReply(prompt) {
+  voiceHistory.push({ role: 'user', content: prompt });
+  if (voiceHistory.length > 12) voiceHistory.shift();
+  try {
+    const reply = await callAI(VOICE_SYSTEM, voiceHistory, 600);
+    voiceHistory.push({ role: 'assistant', content: reply });
+    return cleanForSpeech(reply);
+  } catch (err) {
+    console.error(err);
+    return "Sorry, I couldn't reach the AI right now.";
+  }
+}
+function speak(text) {
+  const face = $('voiceFace');
+  const done = () => face.classList.remove('talking');
+  face.classList.add('talking');
+  if (window.SpeechSDK && CONFIG.speechKey) {
+    try {
+      const sdk = window.SpeechSDK;
+      const cfg = sdk.SpeechConfig.fromSubscription(CONFIG.speechKey, CONFIG.speechRegion);
+      cfg.speechSynthesisVoiceName = 'en-US-JennyNeural';
+      const synth = new sdk.SpeechSynthesizer(cfg, sdk.AudioConfig.fromDefaultSpeakerOutput());
+      synth.speakTextAsync(text, () => { done(); synth.close(); }, (e) => { console.error(e); done(); synth.close(); });
+      return;
+    } catch (e) { console.error(e); }
+  }
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.onend = done; u.onerror = done;
+    speechSynthesis.speak(u);
+  } else { done(); }
+}
+async function handleVoiceText(text) {
+  $('userText').textContent = text;
+  if (!text) return;
+  $('aiResponse').textContent = '…';
+  const reply = await getVoiceReply(text);
+  $('aiResponse').textContent = reply;
+  speak(reply);
+}
+function startVoice() {
+  const btn = $('talkBtn');
+  const reset = () => { btn.disabled = false; btn.textContent = '🎙️ Talk to Me'; };
+  btn.disabled = true;
+  btn.textContent = '🎧 Listening...';
+  if (window.SpeechSDK && CONFIG.speechKey) {
+    try {
+      const sdk = window.SpeechSDK;
+      const cfg = sdk.SpeechConfig.fromSubscription(CONFIG.speechKey, CONFIG.speechRegion);
+      cfg.speechRecognitionLanguage = 'en-US';
+      const rec = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromDefaultMicrophoneInput());
+      rec.recognizeOnceAsync(async (result) => { reset(); rec.close(); await handleVoiceText(result.text); },
+        (err) => { console.error(err); reset(); rec.close(); $('aiResponse').textContent = 'Could not hear you. Check microphone permission.'; });
+      return;
+    } catch (e) { console.error(e); }
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { reset(); $('aiResponse').textContent = 'Speech recognition is not supported in this browser. Try Chrome or Edge.'; return; }
+  const r = new SR();
+  r.lang = 'en-US';
+  r.onresult = (e) => { handleVoiceText(e.results[0][0].transcript); };
+  r.onerror = () => { $('aiResponse').textContent = 'Could not hear you. Check microphone permission.'; };
+  r.onend = reset;
+  r.start();
+}
+
+/* ═══════ SMART TIPS ═══════ */
+const LOCAL_TIPS = {
+  'Wireless Buds': 'Charge the case overnight, try different ear-tip sizes for better noise cancellation, and keep the firmware updated.',
+  'Smart Planner': 'Plan your top three tasks each morning, block time for deep work, and review your week every Sunday.',
+  'Acer Aspire 5 15': 'Turn on battery saver when unplugged, add an SSD or extra RAM if it feels slow, and keep drivers updated.'
+};
+let toastTimer;
+function showToast(text) {
+  $('toastText').textContent = text;
+  $('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $('toast').classList.remove('show'), 9000);
+}
+async function getTips(product) {
+  showToast('Thinking up tips for ' + product + '…');
+  try {
+    const tips = await callAI('You give short, practical product tips. Reply with 3 numbered tips, under 60 words in total. No markdown formatting.',
+      [{ role: 'user', content: 'Give me smart tips for getting the most out of this product: ' + product }], 700);
+    showToast(tips);
+  } catch (err) {
+    console.error(err);
+    showToast(LOCAL_TIPS[product] || 'Read the manual and keep it updated.');
+  }
+}
+
+/* ═══════ GUARDIAN WIDGET (rule-based demo) ═══════ */
+const familyState = {
+  memberName: 'Thabo', lastSeen: '4 minutes ago', location: 'near Oak Street, on his usual route to school',
+  distance: 32, safeDistance: 50, zoneStatus: 'SAFE', watchBattery: 61, tagBattery: 74, signal: 'Strong (cellular)'
+};
+let chatOpened = false;
+
+function toggleChat() {
+  const win = $('chatWindow');
+  const opening = !win.classList.contains('open');
+  win.classList.toggle('open');
+  if (opening && !chatOpened) {
+    chatOpened = true;
+    $('chatToggle').classList.add('no-alert');
+    addBubble($('chatBox'), 'ai', `Hi, I'm Guardian 🛡️ I can tell you where ${familyState.memberName} is, explain alerts, or walk you through SOS and pairing. What would you like to know?`, '🛡️');
+  }
+}
+function openChatFromPage() {
+  if (!$('chatWindow').classList.contains('open')) toggleChat();
+  $('chatInput').focus();
+}
+function sendQuick(text) { $('chatInput').value = text; handleChat(); }
+function handleChat() {
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  const box = $('chatBox');
+  addBubble(box, 'user', text, '🧑');
+  const typing = addTyping(box, '🛡️');
+  setTimeout(() => { typing.remove(); addBubble(box, 'ai', guardianReply(text), '🛡️'); }, 500 + Math.random() * 500);
+}
+function guardianReply(raw) {
+  const t = raw.toLowerCase(), s = familyState;
+  if (/(where|location|find|track)/.test(t)) return `${s.memberName} was last seen ${s.lastSeen}, ${s.location}. Currently ${s.distance}m away, within the ${s.safeDistance}m safe distance, so status is ${s.zoneStatus}.`;
+  if (/(safe distance|zone|alert|cross)/.test(t)) return `A safe distance alert fires when ${s.memberName} moves further than your set limit (currently ${s.safeDistance}m). It isn't necessarily a problem, just a heads-up so you can check in. You can change the distance in Settings → Safe Zone.`;
+  if (/(sos|emergency|panic|help button)/.test(t)) return `Hold the SOS button on the watch for 3 seconds to send live location and an alarm to your phone. The wearer needs no app. You also get a call-back option straight from the alert.`;
+  if (/(battery|charge|power)/.test(t)) return `Watch battery is at ${s.watchBattery}%, tracker tag at ${s.tagBattery}%. You get a low-battery warning at 20% so there's time to charge.`;
+  if (/(pair|connect|bluetooth|setup|set up)/.test(t)) return `To pair: turn on the watch and tag, tap "Add device" in the app and hold them within 30cm of each other. Pairing usually takes under a minute.`;
+  if (/(signal|sms|offline)/.test(t)) return `Current signal: ${s.signal}. If cellular drops, alerts fall back to SMS so you are still notified.`;
+  if (/(price|plan|cost|subscription|pay)/.test(t)) return `We have Free, Family, Premium and Business plans. Scroll to the Subscriptions section to compare them.`;
+  if (/(thank)/.test(t)) return `Anytime, that's what I'm here for.`;
+  if (/(^|\s)(hi|hello|hey)(\s|$|!)/.test(t)) return `Hi there! Ask me about ${s.memberName}'s location, battery, safe distance alerts, or SOS.`;
+  return `I can help with live location, safe distance alerts, SOS, battery, pairing, signal fallback and plans. Try "Where is ${s.memberName} right now?"`;
+}
+$('chatInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleChat(); });
+
+showTab('support');
+</script>
+</body>
+</html>
