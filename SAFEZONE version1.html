@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeZone — Know they're safe</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: black;
+    --surface: black;
+    --card: black;
+    --accent: turquoise;
+    --accent2: darkorange;
+    --alert: indianred;
+    --safe: turquoise;
+    --text: aliceblue;
+    --muted: slategray;
+    --border: rgba(59,232,176,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    font-family: 'Sora', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+
+  /* background grid, same as app */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(59,232,176,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,232,176,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+  .page { position:relative; z-index:1; }
+
+  :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; }
+
+  /* ── NAV ── */
+  .nav {
+    position: sticky; top:0; z-index:20;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width:1200px; margin:0 auto;
+    padding: 16px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .logo {
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:20px; font-weight:700; letter-spacing:-0.5px;
+    color: var(--accent);
+    text-decoration:none;
+  }
+  .logo span { color: var(--text); }
+  .nav-links { display:flex; gap:28px; font-size:13px; font-weight:500; }
+  .nav-links a { text-decoration:none; color: var(--muted); }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── BUTTONS (from app) ── */
+  .btn {
+    display:inline-block; width:auto;
+    padding: 11px 22px;
+    border-radius:10px; border:none; cursor:pointer;
+    font-family:'Sora',sans-serif; font-size:13px; font-weight:600;
+    letter-spacing:0.3px;
+    text-decoration:none;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: black; }
+  .btn-danger { background: var(--alert); color: white; }
+  .btn-outline { background: transparent; color: var(--accent); border: 1px solid rgba(59,232,176,0.35); }
+  .btn-small { padding: 8px 16px; font-size:12px; }
+  .btn-large { padding: 15px 30px; font-size:14px; margin-top:24px; }
+
+  /* ── HERO ── */
+  header.hero-top { text-align:center; padding: 56px 24px 8px; }
+  .tagline { color: var(--muted); font-size:14px; margin-top:6px; letter-spacing:0.5px; }
+
+  .hero {
+    max-width:1200px; margin:0 auto;
+    padding: 40px 24px 80px;
+    display:grid; grid-template-columns: 1.05fr 0.95fr;
+    gap: 48px; align-items:center;
+  }
+  .eyebrow {
+    font-family:'DM Mono', monospace;
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color: var(--accent); margin-bottom:16px; display:block;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+    font-weight:800; line-height:1.08; letter-spacing:-1px;
+    margin-bottom: 20px;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .lede { display:block; font-size:1.02rem; color: var(--muted); max-width:32rem; margin-bottom:28px; line-height:1.6; }
+  .hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
+  .hero-note { margin-top:18px; font-size:11px; color: var(--muted); font-family:'DM Mono',monospace; }
+
+  /* ── PHONE SHELL (from app) ── */
+  .phone-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .phone-label {
+    font-size:11px; font-weight:600; letter-spacing:1.5px;
+    text-transform:uppercase; color: var(--muted);
+  }
+  .phone {
+    width:240px;
+    background: black;
+    border-radius: 36px;
+    border: 2px solid var(--border);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 60px rgba(0,0,0,0.6), 0 0 40px rgba(59,232,176,0.08);
+    overflow: hidden;
+    position: relative;
+    animation: floatIn 0.6s ease both;
+  }
+  @keyframes floatIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+  .phone::before {
+    content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:80px; height:22px; background: black; border-radius: 0 0 18px 18px; z-index:10;
+  }
+  .phone-screen { padding: 36px 0 20px; min-height: 400px; display:flex; flex-direction:column; }
+  .statusbar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 0 16px 8px; font-size:9px; font-family:'DM Mono', monospace; color: var(--muted);
+  }
+  .screen-header { padding: 8px 16px 12px; border-bottom: 1px solid var(--border); }
+  .screen-title { font-size:13px; font-weight:700; color: var(--accent); display:flex; align-items:center; gap:6px; }
+  .screen-step { font-size:9px; color: var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+  .screen-body { padding:14px 16px; flex:1; display:flex; flex-direction:column; gap:10px; }
+
+  .field {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 9px 12px;
+  }
+  .field-label { font-size:8px; color: var(--muted); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:3px; }
+  .field-value { font-size:11px; color: var(--text); font-family:'DM Mono',monospace; }
+
+  .processing {
+    background: rgba(59,232,176,0.06); border: 1px solid rgba(59,232,176,0.2);
+    border-radius:10px; padding:9px 12px; display:flex; align-items:center; gap:8px;
+  }
+  .proc-dot { width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .proc-text { font-size:10px; color: var(--accent); }
+
+  .output-success { background: rgba(59,232,176,0.1); border: 1px solid rgba(59,232,176,0.35); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:8px; }
+  .output-text { font-size:10px; color: var(--accent); font-weight:600; }
+  .output-sub { font-size:9px; color: var(--muted); margin-top:1px; }
+
+  .map-widget {
+    border-radius:12px; overflow:hidden; position:relative; height:120px;
+    background: linear-gradient(135deg, midnightblue 0%, midnightblue 100%);
+    border: 1px solid var(--border);
+  }
+  .map-grid {
+    position:absolute; inset:0;
+    background-image: linear-gradient(rgba(59,232,176,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(59,232,176,0.06) 1px, transparent 1px);
+    background-size:20px 20px;
+  }
+  .map-pin { position:absolute; width:10px; height:10px; border-radius:50%; }
+  .pin-parent { background: var(--accent); top:60%; left:35%; box-shadow: 0 0 0 3px rgba(59,232,176,0.25); }
+  .pin-child { background: var(--accent2); top:25%; left:65%; box-shadow: 0 0 0 3px rgba(249,115,22,0.25); animation: childPulse 2s infinite; }
+  @keyframes childPulse { 0%,100%{ box-shadow: 0 0 0 3px rgba(249,115,22,0.25); } 50%{ box-shadow: 0 0 0 8px rgba(249,115,22,0.08); } }
+  .map-label { position:absolute; bottom:6px; right:8px; font-size:8px; font-family:'DM Mono',monospace; color: var(--muted); }
+  .map-legend { display:flex; gap:12px; margin-top:6px; }
+  .legend-item { display:flex; align-items:center; gap:4px; font-size:8px; color: var(--muted); }
+  .legend-dot { width:6px; height:6px; border-radius:50%; }
+
+  .status-badge { display:inline-flex; align-items:center; gap:5px; padding: 4px 10px; border-radius:99px; font-size:9px; font-weight:600; letter-spacing:0.5px; }
+  .badge-safe { background: rgba(59,232,176,0.15); color: var(--safe); border:1px solid rgba(59,232,176,0.3); }
+
+  /* ── SECTION HEADINGS ── */
+  .section-eyebrow {
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:2px;
+    text-transform:uppercase; color: var(--muted); text-align:center; display:block;
+  }
+  h2.section-title {
+    text-align:center; font-size: clamp(1.5rem, 2.6vw, 2rem);
+    margin: 10px auto 44px; max-width:30rem; letter-spacing:-0.5px;
+  }
+  .section-divider {
+    text-align:center; padding: 32px 24px 24px;
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color: var(--muted); display:flex; align-items:center; gap:16px;
+    max-width:1200px; margin:0 auto;
+  }
+  .section-divider::before, .section-divider::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* ── HOW IT WORKS ── */
+  .how { max-width:1200px; margin:0 auto; padding: 20px 24px 70px; }
+  .steps { list-style:none; display:grid; grid-template-columns: repeat(3,1fr); gap:18px; }
+  .steps li { background: var(--card); border: 1px solid var(--border); border-radius:16px; padding: 24px; }
+  .step-num { font-family:'DM Mono',monospace; color: var(--accent); font-size:12px; letter-spacing:1px; }
+  .steps h3 { font-size:15px; margin: 10px 0 8px; }
+  .steps p { color: var(--muted); font-size:12.5px; line-height:1.6; }
+
+  /* ── FEATURES ── */
+  .features { max-width:1200px; margin:0 auto; padding: 20px 24px 70px; }
+  .feature-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  .feature-card { background: var(--card); border: 1px solid var(--border); border-radius:14px; padding: 20px; }
+  .feature-card h3 { font-size:14px; color: var(--accent); margin-bottom:6px; }
+  .feature-card p { color: var(--muted); font-size:12px; line-height:1.6; }
+  .feature-card.featured { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.06); }
+  .feature-card.featured h3 { color: var(--alert); }
+
+  /* ── GUARDIAN ── */
+  .guardian { max-width:1200px; margin:0 auto; padding: 20px 24px 80px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
+  .guardian h2 { font-size: clamp(1.4rem,2.4vw,1.9rem); margin: 10px 0 14px; letter-spacing:-0.5px; }
+  .guardian-copy p.body { color: var(--muted); font-size:13px; line-height:1.7; max-width:28rem; }
+  .chat-mock { display:flex; flex-direction:column; gap:10px; }
+  .chat-bubble { padding: 11px 15px; border-radius:14px; font-size:12.5px; max-width:85%; line-height:1.5; font-family:'DM Mono',monospace; }
+  .bubble-in { background: rgba(255,255,255,0.04); border: 1px solid var(--border); align-self:flex-start; color: var(--text); }
+  .bubble-out { background: var(--accent); color: black; align-self:flex-end; font-weight:600; }
+
+  /* ── CTA ── */
+  .cta { text-align:center; padding: 80px 24px; border-top: 1px solid var(--border); }
+  .cta h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing:-0.5px; margin-bottom:4px; }
+  .cta p.body { color: var(--muted); font-size:13px; margin-top:10px; }
+
+  /* ── FOOTER ── */
+  footer { text-align:center; padding:28px 24px; font-size:11px; color: var(--muted); border-top: 1px solid var(--border); }
+  footer .logo { justify-content:center; margin-bottom:8px; font-size:16px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 880px) {
+    .hero { grid-template-columns: 1fr; padding-top:16px; }
+    .hero-visual { order:-1; display:flex; justify-content:center; }
+    .steps { grid-template-columns: 1fr; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
+    .guardian { grid-template-columns: 1fr; }
+    .nav-links { display:none; }
+  }
+  @media (max-width: 560px) {
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .proc-dot, .pin-child { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ── NAV AUTH ── */
+  .nav-auth { display:flex; align-items:center; gap:10px; }
+  .btn-ghost { background:transparent; color: var(--text); padding: 10px 16px; }
+  .btn-ghost:hover { color: var(--accent); }
+
+  /* ── AUTH MODAL ── */
+  .modal-overlay {
+    position: fixed; inset:0; z-index:50;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px;
+    opacity:0; pointer-events:none;
+    transition: opacity 0.2s ease;
+  }
+  .modal-overlay.open { opacity:1; pointer-events:auto; }
+  .modal-card {
+    width:100%; max-width:380px;
+    background:#050505;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding: 28px 26px 30px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 40px rgba(59,232,176,0.08);
+    transform: translateY(12px);
+    transition: transform 0.2s ease;
+  }
+  .modal-overlay.open .modal-card { transform: translateY(0); }
+  .modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .modal-title { font-size:16px; font-weight:700; letter-spacing:-0.3px; }
+  .modal-close {
+    background:transparent; border:none; color: var(--muted); cursor:pointer;
+    font-size:18px; line-height:1; padding:4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .auth-tabs { display:flex; gap:6px; background: rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .auth-tab {
+    flex:1; text-align:center; padding:8px 0; border-radius:8px; border:none; cursor:pointer;
+    background:transparent; color: var(--muted); font-family:'Sora',sans-serif;
+    font-size:12px; font-weight:600; letter-spacing:0.3px; transition: all 0.15s ease;
+  }
+  .auth-tab.active { background: var(--accent); color: black; }
+  .auth-form { display:flex; flex-direction:column; gap:12px; }
+  .auth-form.hidden { display:none; }
+  .form-field label {
+    display:block; font-size:9px; color: var(--muted); letter-spacing:0.8px;
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .form-field input {
+    width:100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius:10px; padding: 11px 12px; color: var(--text);
+    font-family:'Sora',sans-serif; font-size:13px;
+  }
+  .form-field input::placeholder { color: rgba(148,163,184,0.4); }
+  .form-field input:focus { outline:none; border-color: var(--accent); }
+  .auth-submit { width:100%; margin-top:6px; text-align:center; }
+  .auth-note { font-size:11px; color: var(--muted); text-align:center; margin-top:16px; }
+  .auth-note a { color: var(--accent); text-decoration:none; font-weight:600; cursor:pointer; }
+  .auth-note a:hover { text-decoration:underline; }
+
+  @media (max-width: 420px) {
+    .nav-auth .btn-ghost { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="nav">
+    <div class="nav-inner">
+      <a href="#top" class="logo">🛡️ Safe<span>Zone</span></a>
+      <nav class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#guardian">Guardian</a>
+      </nav>
+      <div class="nav-auth">
+        <button class="btn btn-ghost btn-small" onclick="openAuth('login')">Log in</button>
+        <button class="btn btn-primary btn-small" onclick="openAuth('signup')">Sign up</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="authOverlay" onclick="if(event.target===this) closeAuth()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-title" id="authTitle">Welcome back</span>
+        <button class="modal-close" onclick="closeAuth()" aria-label="Close">✕</button>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchAuth('login')">Log in</button>
+        <button class="auth-tab" id="tabSignup" onclick="switchAuth('signup')">Sign up</button>
+      </div>
+
+      <form class="auth-form" id="formLogin" onsubmit="return handleAuthSubmit(event,'login')">
+        <div class="form-field">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="form-field">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit">Log in</button>
+        <div class="auth-note">Don't have an account? <a onclick="switchAuth('signup')">Sign up</a></div>
+      </form>
+
+      <form class="auth-form hidden" id="formSignup" onsubmit="return handleAuthSubmit(event,'signup')">
+        <div class="form-field">
+          <label for="signupName">Full name</label>
+          <input type="text" id="signupName" placeholder="Your name" required>
+        </div>
+        <div class="form-field">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="form-field">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" placeholder="At least 8 characters" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit">Create account</button>
+        <div class="auth-note">Already have an account? <a onclick="switchAuth('login')">Log in</a></div>
+      </form>
+    </div>
+  </div>
+
+  <header class="hero-top" id="top">
+    <div class="tagline">Child Safety Tracking, In Real Time</div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Worn on the wrist</span>
+      <h1>Know they're<br><span class="accent">safe</span>, wherever<br>they are.</h1>
+      <p class="lede">SafeZone pairs a smartwatch and tracker tag so you always know where your child is — live location, safe‑distance alerts, and an SOS that reaches you first.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn btn-primary" onclick="openAuth('signup'); return false;">Set up a safe zone</a>
+        <a href="#how" class="btn btn-outline">See how it works</a>
+      </div>
+      <span class="hero-note">NO SMARTPHONE REQUIRED FOR YOUR CHILD · WORKS OVER CELLULAR</span>
+    </div>
+
+    <div class="hero-visual">
+      <div class="phone-wrap">
+        <div class="phone-label">Live Monitor</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="screen-header">
+              <div class="screen-title">🗺️ Live Monitor</div>
+              <div class="screen-step">HOME ZONE · ACTIVE</div>
+            </div>
+            <div class="screen-body">
+              <div class="map-widget">
+                <div class="map-grid"></div>
+                <svg class="distance-line" viewBox="0 0 220 100" style="position:absolute;inset:0;">
+                  <line x1="77" y1="70" x2="150" y2="30" stroke="rgba(59,232,176,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
+                </svg>
+                <div class="map-pin pin-parent" title="You"></div>
+                <div class="map-pin pin-child" title="Child"></div>
+                <div class="map-label">GPS LIVE</div>
+              </div>
+              <div class="map-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>You</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Child</div>
+                <div class="legend-item" style="margin-left:auto"><div class="legend-dot" style="background:rgba(59,232,176,0.3)"></div>32m apart</div>
+              </div>
+              <div class="output-success">
+                <span class="status-badge badge-safe">● SAFE — Within 50m</span>
+              </div>
+              <div class="processing">
+                <div class="proc-dot"></div>
+                <div class="proc-text">Refreshing location…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider">How it works</div>
+  <section class="how" id="how">
+    <ol class="steps">
+      <li>
+        <span class="step-num">① PAIR</span>
+        <h3>Pair the watch</h3>
+        <p>Strap the SafeZone watch and tag onto your child. It connects over cellular in minutes — no setup on their end.</p>
+      </li>
+      <li>
+        <span class="step-num">② SET</span>
+        <h3>Set a safe distance</h3>
+        <p>Choose how far is too far. You'll get an alert the moment your child crosses that line.</p>
+      </li>
+      <li>
+        <span class="step-num">③ MONITOR</span>
+        <h3>Get notified</h3>
+        <p>Live location on the map, plus an instant alert if they leave the zone, press SOS, or lose signal.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="section-divider">Built in</div>
+  <section class="features" id="features">
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Live location</h3>
+        <p>Real-time position on the map, refreshed every few seconds while on the move.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Safe distance</h3>
+        <p>Set the range that matters and get alerted the instant it's crossed.</p>
+      </div>
+      <div class="feature-card featured">
+        <h3>SOS alert</h3>
+        <p>One press sends location and an alarm straight to you — no app needed on their side.</p>
+      </div>
+      <div class="feature-card">
+        <h3>SMS fallback</h3>
+        <p>No signal, no problem. Alerts fall back to SMS so you're never left in the dark.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Battery watch</h3>
+        <p>Get a heads-up before the watch runs out, so you can plan ahead.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Bluetooth pairing</h3>
+        <p>Quick, verified pairing between watch and tracker tag with a live signal readout.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider">Guardian chat</div>
+  <section class="guardian" id="guardian">
+    <div class="guardian-copy">
+      <h2>A calm voice when you need answers fast</h2>
+      <p class="body">Ask the Guardian chatbot where your child was last seen, what a distance alert meant, or what to do next — in plain language, any time.</p>
+    </div>
+    <div class="chat-mock">
+      <div class="chat-bubble bubble-in">Thabo crossed the 50m safe distance 4 minutes ago, heading toward Oak Street.</div>
+      <div class="chat-bubble bubble-out">Is that on his usual route to school?</div>
+      <div class="chat-bubble bubble-in">Yes — matches his weekday walk. Battery at 61%.</div>
+    </div>
+  </section>
+
+  <section class="cta" id="get-started">
+    <h2>Give them room to roam.<br>Give yourself peace of mind.</h2>
+    <p class="body">Set up your first safe zone in under five minutes.</p>
+    <a href="#" class="btn btn-primary btn-large" onclick="openAuth('signup'); return false;">Set up your first safe zone</a>
+  </section>
+
+  <footer>
+    <div class="logo">🛡️ Safe<span>Zone</span></div>
+    A child safety tracker built for South African families.
+  </footer>
+
+</div>
+
+<script>
+  function openAuth(mode) {
+    document.getElementById('authOverlay').classList.add('open');
+    switchAuth(mode || 'login');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAuth() {
+    document.getElementById('authOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function switchAuth(mode) {
+    const isLogin = mode === 'login';
+    document.getElementById('formLogin').classList.toggle('hidden', !isLogin);
+    document.getElementById('formSignup').classList.toggle('hidden', isLogin);
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+    document.getElementById('authTitle').textContent = isLogin ? 'Welcome back' : 'Create your account';
+  }
+  function handleAuthSubmit(e, mode) {
+    e.preventDefault();
+    // Hook up to your backend/auth provider here.
+    console.log(mode + ' submitted');
+    closeAuth();
+    return false;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAuth();
+  });
+</script>
+</body>
+</html>

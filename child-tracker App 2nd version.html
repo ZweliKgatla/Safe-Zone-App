@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeStep – Child Tracker App</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --card: #161f32;
+    --accent: #3be8b0;
+    --accent2: #f97316;
+    --alert: #ef4444;
+    --safe: #3be8b0;
+    --text: #e8f0fe;
+    --muted: #6b7a99;
+    --border: rgba(59,232,176,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    font-family: 'Sora', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(59,232,176,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,232,176,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .page { position:relative; z-index:1; }
+
+  /* ── HEADER ── */
+  header {
+    text-align:center;
+    padding: 48px 24px 32px;
+  }
+  .logo {
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:28px; font-weight:700; letter-spacing:-0.5px;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text); }
+  .tagline { color: var(--muted); font-size:14px; margin-top:6px; letter-spacing:0.5px; }
+
+  /* ── FLOW TITLE ── */
+  .flow-title {
+    text-align:center;
+    font-size:12px; font-weight:600; letter-spacing:2px;
+    color: var(--muted); text-transform:uppercase;
+    margin-bottom: 40px;
+  }
+
+  /* ── SCREENS CONTAINER ── */
+  .screens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    padding: 0 24px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── PHONE SHELL ── */
+  .phone-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .phone-label {
+    font-size:11px; font-weight:600; letter-spacing:1.5px;
+    text-transform:uppercase; color: var(--muted);
+  }
+  .phone {
+    width:220px;
+    background: #0d1420;
+    border-radius: 36px;
+    border: 2px solid var(--border);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 60px rgba(0,0,0,0.6), 0 0 40px rgba(59,232,176,0.08);
+    overflow: hidden;
+    position: relative;
+    animation: floatIn 0.6s ease both;
+  }
+  .phone:nth-child(1) { animation-delay:0.05s; }
+  .phone:nth-child(2) { animation-delay:0.15s; }
+
+  @keyframes floatIn {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* notch */
+  .phone::before {
+    content:'';
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:80px; height:22px;
+    background: #0a0f1e;
+    border-radius: 0 0 18px 18px;
+    z-index:10;
+  }
+
+  .phone-screen {
+    padding: 36px 0 20px;
+    min-height: 400px;
+    display:flex; flex-direction:column;
+  }
+
+  /* ── STATUS BAR ── */
+  .statusbar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 0 16px 8px;
+    font-size:9px; font-family:'DM Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* ── SCREEN HEADER ── */
+  .screen-header {
+    padding: 8px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .screen-title {
+    font-size:13px; font-weight:700; color: var(--accent);
+    display:flex; align-items:center; gap:6px;
+  }
+  .screen-step {
+    font-size:9px; color: var(--muted); font-family:'DM Mono',monospace;
+    margin-top:2px;
+  }
+
+  /* ── SCREEN BODY ── */
+  .screen-body { padding:14px 16px; flex:1; display:flex; flex-direction:column; gap:10px; }
+
+  /* INPUT FIELD */
+  .field {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 9px 12px;
+  }
+  .field-label { font-size:8px; color: var(--muted); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:3px; }
+  .field-value { font-size:11px; color: var(--text); font-family:'DM Mono',monospace; }
+  .field-value.placeholder { color: rgba(255,255,255,0.2); }
+
+  /* PROCESSING BLOCK */
+  .processing {
+    background: rgba(59,232,176,0.06);
+    border: 1px solid rgba(59,232,176,0.2);
+    border-radius:10px;
+    padding:9px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .proc-dot {
+    width:6px; height:6px; border-radius:50%;
+    background: var(--accent);
+    flex-shrink:0;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .proc-text { font-size:10px; color: var(--accent); }
+
+  /* OUTPUT / SUCCESS */
+  .output-success {
+    background: rgba(59,232,176,0.1);
+    border: 1px solid rgba(59,232,176,0.35);
+    border-radius:10px;
+    padding:10px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .check { font-size:14px; }
+  .output-text { font-size:10px; color: var(--accent); font-weight:600; }
+  .output-sub { font-size:9px; color: var(--muted); margin-top:1px; }
+
+  /* ALERT / ERROR */
+  .output-alert {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.35);
+    border-radius:10px;
+    padding:10px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .output-alert .output-text { color: var(--alert); }
+
+  /* ORANGE WARNING */
+  .output-warn {
+    background: rgba(249,115,22,0.1);
+    border: 1px solid rgba(249,115,22,0.35);
+    border-radius:10px;
+    padding:10px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .output-warn .output-text { color: var(--accent2); }
+
+  /* MAP WIDGET */
+  .map-widget {
+    border-radius:12px; overflow:hidden;
+    position:relative; height:100px;
+    background: linear-gradient(135deg, #0f1e35 0%, #0d1a2e 100%);
+    border: 1px solid var(--border);
+  }
+  .map-grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(59,232,176,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,232,176,0.06) 1px, transparent 1px);
+    background-size:20px 20px;
+  }
+  .map-pin {
+    position:absolute;
+    width:10px; height:10px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pin-parent {
+    background: var(--accent);
+    top:60%; left:35%;
+    box-shadow: 0 0 0 3px rgba(59,232,176,0.25);
+  }
+  .pin-child {
+    background: var(--accent2);
+    top:25%; left:65%;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.25);
+    animation: childPulse 2s infinite;
+  }
+  @keyframes childPulse {
+    0%,100%{ box-shadow: 0 0 0 3px rgba(249,115,22,0.25); }
+    50%{ box-shadow: 0 0 0 8px rgba(249,115,22,0.08); }
+  }
+  .distance-line {
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    pointer-events:none;
+  }
+  .map-label {
+    position:absolute; bottom:6px; right:8px;
+    font-size:8px; font-family:'DM Mono',monospace;
+    color: var(--muted);
+  }
+  .map-legend {
+    display:flex; gap:12px; margin-top:6px;
+  }
+  .legend-item { display:flex; align-items:center; gap:4px; font-size:8px; color: var(--muted); }
+  .legend-dot { width:6px; height:6px; border-radius:50%; }
+
+  /* DISTANCE BAR */
+  .dist-bar-wrap { }
+  .dist-bar-label {
+    display:flex; justify-content:space-between;
+    font-size:9px; color: var(--muted); margin-bottom:4px;
+  }
+  .dist-bar-track {
+    height:6px; border-radius:99px;
+    background: rgba(255,255,255,0.07);
+    overflow:hidden;
+  }
+  .dist-bar-fill {
+    height:100%; border-radius:99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 1s ease;
+  }
+
+  /* ALERT SCREEN SPECIAL */
+  .alert-pulse {
+    width:60px; height:60px; border-radius:50%;
+    background: rgba(239,68,68,0.15);
+    border: 2px solid var(--alert);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 10px;
+    font-size:24px;
+    animation: alertPulse 1s infinite;
+  }
+  @keyframes alertPulse {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50%{ box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+  }
+  .alert-center { text-align:center; }
+  .alert-big { font-size:13px; font-weight:700; color: var(--alert); margin-bottom:4px; }
+  .alert-coord { font-size:9px; font-family:'DM Mono',monospace; color: var(--muted); }
+
+  /* SAFE STATUS */
+  .status-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    padding: 4px 10px; border-radius:99px;
+    font-size:9px; font-weight:600; letter-spacing:0.5px;
+  }
+  .badge-safe { background: rgba(59,232,176,0.15); color: var(--safe); border:1px solid rgba(59,232,176,0.3); }
+  .badge-alert { background: rgba(239,68,68,0.15); color: var(--alert); border:1px solid rgba(239,68,68,0.3); }
+
+  /* BTN */
+  .btn {
+    display:block; width:100%;
+    padding: 9px;
+    border-radius:10px; border:none; cursor:pointer;
+    font-family:'Sora',sans-serif; font-size:11px; font-weight:600;
+    letter-spacing:0.3px;
+  }
+  .btn-primary {
+    background: var(--accent); color: #0a0f1e;
+  }
+  .btn-danger {
+    background: var(--alert); color:#fff;
+  }
+  .btn-outline {
+    background: transparent; color: var(--accent);
+    border: 1px solid rgba(59,232,176,0.35);
+  }
+
+  /* ── FLOW ARROWS ── */
+  .flow-section {
+    display:flex; flex-wrap:wrap; align-items:flex-start;
+    justify-content:center; gap:0;
+    padding: 0 24px 60px;
+    max-width:1200px; margin:0 auto;
+  }
+  .flow-phone-col { display:flex; flex-direction:column; align-items:center; }
+  .flow-arrow {
+    display:flex; align-items:center;
+    padding: 0 4px;
+    margin-top: 180px;
+    color: var(--muted); font-size:18px;
+    flex-shrink:0;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider {
+    text-align:center; padding: 32px 24px 24px;
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color: var(--muted);
+    display:flex; align-items:center; gap:16px;
+    max-width:1200px; margin:0 auto;
+  }
+  .section-divider::before, .section-divider::after {
+    content:''; flex:1; height:1px;
+    background: var(--border);
+  }
+
+  /* ── ERROR TABLE ── */
+  .error-section {
+    max-width:900px; margin:0 auto; padding:0 24px 60px;
+  }
+  .error-title {
+    font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    color: var(--muted); text-align:center; margin-bottom:20px;
+  }
+  .error-grid {
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+  }
+  @media(max-width:600px){ .error-grid{ grid-template-columns:1fr; } }
+  .error-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius:14px; padding:14px;
+  }
+  .ec-scenario { font-size:9px; color: var(--muted); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:6px; }
+  .ec-error { font-size:11px; color: var(--alert); font-weight:600; margin-bottom:6px; }
+  .ec-response { font-size:10px; color: var(--text); line-height:1.5; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align:center; padding:24px;
+    font-size:10px; color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">🛡️ Safe<span>Step</span></div>
+    <div class="tagline">Child Safety Tracking App — UI Flow Diagram</div>
+  </header>
+
+  <!-- SECTION: MAIN FLOW -->
+  <div class="flow-title">APP SCREEN FLOW</div>
+  <div class="flow-section">
+
+    <!-- SCREEN 1: Create Account -->
+    <div class="flow-phone-col">
+      <div class="phone-label">① Create Account</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+          <div class="screen-header">
+            <div class="screen-title">👤 Create Account</div>
+            <div class="screen-step">MENU OPTION 1</div>
+          </div>
+          <div class="screen-body">
+            <div class="field">
+              <div class="field-label">Full Name</div>
+              <div class="field-value">Thabo Nkosi</div>
+            </div>
+            <div class="field">
+              <div class="field-label">Email Address</div>
+              <div class="field-value">thabo@gmail.com</div>
+            </div>
+            <div class="field">
+              <div class="field-label">Password</div>
+              <div class="field-value">••••••••</div>
+            </div>
+            <div class="processing">
+              <div class="proc-dot"></div>
+              <div class="proc-text">Validating info & creating account…</div>
+            </div>
+            <div class="output-success">
+              <div class="check">✅</div>
+              <div>
+                <div class="output-text">Account Created!</div>
+                <div class="output-sub">Verification email sent</div>
+              </div>
+            </div>
+            <button class="btn btn-primary">Continue →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <!-- SCREEN 2: Pair Device -->
+    <div class="flow-phone-col">
+      <div class="phone-label">② Pair Tracker</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+          <div class="screen-header">
+            <div class="screen-title">🔗 Pair Tracker</div>
+            <div class="screen-step">MENU OPTION 2</div>
+          </div>
+          <div class="screen-body">
+            <div class="field">
+              <div class="field-label">Tracker ID</div>
+              <div class="field-value">TRK-20948-ZA</div>
+            </div>
+            <div class="processing">
+              <div class="proc-dot"></div>
+              <div class="proc-text">Verifying tracker ID…</div>
+            </div>
+            <div class="field">
+              <div class="field-label">Bluetooth Signal</div>
+              <div class="field-value">████░░░ Strong</div>
+            </div>
+            <div class="processing">
+              <div class="proc-dot"></div>
+              <div class="proc-text">Establishing connection…</div>
+            </div>
+            <div class="output-success">
+              <div class="check">✅</div>
+              <div>
+                <div class="output-text">Device Paired!</div>
+                <div class="output-sub">Bluetooth connected</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <!-- SCREEN 3: Set Safe Distance -->
+    <div class="flow-phone-col">
+      <div class="phone-label">③ Safe Distance</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+          <div class="screen-header">
+            <div class="screen-title">📏 Safe Distance</div>
+            <div class="screen-step">MENU OPTION 3</div>
+          </div>
+          <div class="screen-body">
+            <div class="field">
+              <div class="field-label">Distance (meters)</div>
+              <div class="field-value">50 m</div>
+            </div>
+            <div class="dist-bar-wrap">
+              <div class="dist-bar-label">
+                <span>0m</span><span style="color:var(--accent)">50m ✓</span><span>500m</span>
+              </div>
+              <div class="dist-bar-track">
+                <div class="dist-bar-fill" style="width:10%"></div>
+              </div>
+            </div>
+            <div class="processing">
+              <div class="proc-dot"></div>
+              <div class="proc-text">Validating range & saving…</div>
+            </div>
+            <div class="output-success">
+              <div class="check">✅</div>
+              <div>
+                <div class="output-text">Distance Updated!</div>
+                <div class="output-sub">Alert if child exceeds 50m</div>
+              </div>
+            </div>
+            <button class="btn btn-outline">Change Distance</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <!-- SCREEN 4: Monitor Child -->
+    <div class="flow-phone-col">
+      <div class="phone-label">④ Monitor Child</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="statusbar"><span>9:41</span><span>●●● 100%</span></div>
+          <div class="screen-header">
+            <div class="screen-title">🗺️ Live Monitor</div>
+            <div class="screen-step">MENU OPTION 4</div>
+          </div>
+          <div class="screen-body">
+            <!-- MAP -->
+            <div class="map-widget">
+              <div class="map-grid"></div>
+              <svg class="distance-line" viewBox="0 0 220 100">
+                <line x1="77" y1="60" x2="143" y2="25" stroke="rgba(59,232,176,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              </svg>
+              <div class="map-pin pin-parent" title="Parent"></div>
+              <div class="map-pin pin-child" title="Child"></div>
+              <div class="map-label">GPS LIVE</div>
+            </div>
+            <div class="map-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>You</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Child</div>
+              <div class="legend-item" style="margin-left:auto"><div class="legend-dot" style="background:rgba(59,232,176,0.3)"></div>38m apart</div>
+            </div>
+            <div class="processing">
+              <div class="proc-dot"></div>
+              <div class="proc-text">Comparing with safe distance…</div>
+            </div>
+            <div class="output-success">
+              <span class="status-badge badge-safe">● SAFE — Within 50m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <!-- SCREEN 5: Alert Parent -->
+    <div class="flow-phone-col">
+      <div class="phone-label">⑤ Alert Mode</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="statusbar"><span>9:42</span><span>●●● 100%</span></div>
+          <div class="screen-header">
+            <div class="screen-title">🚨 Alert Triggered</div>
+            <div class="screen-step">MENU OPTION 5</div>
+          </div>
+          <div class="screen-body" style="justify-content:center;">
+            <div class="alert-center">
+              <div class="alert-pulse">🚨</div>
+              <div class="alert-big">CHILD OUT OF RANGE!</div>
+              <div class="alert-coord">Distance: 87m (limit: 50m)</div>
+            </div>
+            <div class="output-alert" style="margin-top:8px;">
+              <div>
+                <div class="output-text">⚠ Alarm & notification sent</div>
+                <div class="output-sub">Last known: -25.7479, 28.2293</div>
+              </div>
+            </div>
+            <div class="processing">
+              <div class="proc-dot" style="background:var(--alert)"></div>
+              <div class="proc-text" style="color:var(--alert)">Recording last known position…</div>
+            </div>
+            <button class="btn btn-danger">📞 Call Child's Device</button>
+            <button class="btn btn-outline" style="margin-top:4px">View on Map</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end flow-section -->
+
+  <!-- ERROR STATES SECTION -->
+  <div class="section-divider">Error Handling Scenarios</div>
+  <div class="error-section">
+    <div class="error-grid">
+      <div class="error-card">
+        <div class="ec-scenario">Create Account</div>
+        <div class="ec-error">⚠ Empty Fields</div>
+        <div class="ec-response">All fields are required. Please fill in your name, email, and password before continuing.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Create Account</div>
+        <div class="ec-error">✉ Invalid Email</div>
+        <div class="ec-response">Please enter a valid email address (e.g. name@example.com) to receive your verification link.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Pair Tracker</div>
+        <div class="ec-error">🔍 Tracker Not Found</div>
+        <div class="ec-response">The Tracker ID entered does not exist. Check the device label and try again.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Pair Tracker</div>
+        <div class="ec-error">📡 No Bluetooth Signal</div>
+        <div class="ec-response">Device out of range. Please move closer to the tracker and try pairing again.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Set Distance</div>
+        <div class="ec-error">⛔ Negative / Invalid Value</div>
+        <div class="ec-response">Distance must be a positive number between 5m and 500m. Please enter a valid range.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Monitor Child</div>
+        <div class="ec-error">🛰 GPS Unavailable</div>
+        <div class="ec-response">Cannot retrieve location. Please check GPS settings and ensure both devices have signal.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Monitor Child</div>
+        <div class="ec-error">📶 Signal Lost</div>
+        <div class="ec-response">Connection to child's device lost. Parent notified immediately with last known position.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Alert Parent</div>
+        <div class="ec-error">🔔 Notification Failed</div>
+        <div class="ec-response">Alert delivery failed. The system will automatically retry until the notification is confirmed.</div>
+      </div>
+      <div class="error-card">
+        <div class="ec-scenario">Set Distance</div>
+        <div class="ec-error">📐 Value Too Large</div>
+        <div class="ec-response">The distance entered exceeds the supported maximum. A warning is shown and the value is capped.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>SafeStep App — IPO Flow Diagram &nbsp;|&nbsp; DPRSF0 Year 1 Sem 1 &nbsp;|&nbsp; TUT ICT</footer>
+
+</div>
+</body>
+</html>
