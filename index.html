@@ -345,7 +345,7 @@
     <a href="#home" class="logo">🛡️ Safe<span>Zone</span></a>
     <nav class="nav-links" id="navLinks">
       <a href="#about">About</a><a href="#features">Features</a><a href="#how">How it works</a><a href="#who">Who it's for</a>
-      <a href="#pricing">Pricing</a><a href="#app">The App</a><a href="#tech">Technology</a><a href="#ailab">AI Lab</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+      <a href="#pricing">Pricing</a><a href="#app">The App</a><a href="#tech">Technology</a><a href="#ailab">AI</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </nav>
     <div class="nav-auth">
       <button class="btn btn-ghost btn-small" onclick="openAuth('login')">Log in</button>
@@ -700,37 +700,28 @@
 </section>
 
 <!-- AI LAB -->
-<div class="section-divider">AI Lab</div>
+<div class="section-divider">Talk to SafeZone AI</div>
 <section class="section" id="ailab">
   <div class="lab-head">
     <img src="human-face.jpg" alt="AI assistant" onerror="this.remove()">
-    <div><h2 class="section-title" style="margin-bottom:6px;text-align:left">Try our AI demos</h2>
-    <p class="section-sub" style="text-align:left;margin:0">Three AI assistants from JGA Week, ICT First Year and Foundation Unit.</p></div>
+    <div><h2 class="section-title" style="margin-bottom:6px;text-align:left">Talk to SafeZone AI</h2>
+    <p class="section-sub" style="text-align:left;margin:0">Ask our support assistant by typing, or speak to Guardian out loud.</p></div>
   </div>
   <div class="lab-tabs" role="tablist">
     <button class="lab-tab active" data-tab="support" onclick="showTab('support')">💬 Support Bot</button>
-    <button class="lab-tab" data-tab="voice" onclick="showTab('voice')">🎙️ Voice AI</button>
-    <button class="lab-tab" data-tab="tips" onclick="showTab('tips')">💡 Smart Tips</button>
+    <button class="lab-tab" data-tab="voice" onclick="showTab('voice')">🎙️ Talk to Guardian</button>
   </div>
   <div class="lab-panel" id="tab-support">
-    <h3>Customer Support Bot</h3><p>Ask about shoe sizes, colours, delivery or where we are. The bot only answers questions about the store.</p>
+    <h3>SafeZone Support Bot</h3><p>Ask about plans and prices, pairing the watch and tag, SOS, safe zones, battery or where we are. The bot only answers questions about SafeZone.</p>
     <div class="lab-chat" id="supportBox"></div>
     <div class="input-row"><input id="supportInput" placeholder="Hi, how can I help you?" autocomplete="off"><button class="btn btn-primary btn-small" onclick="handleSupport()">Send</button></div>
   </div>
   <div class="lab-panel hidden" id="tab-voice"><div class="voice-box">
-    <h3>Voice AI Assistant</h3><p>Press the button and ask a question about electronics.</p>
-    <img id="voiceFace" class="voice-face" src="human-face.jpg" alt="AI assistant face" onerror="this.style.display='none'">
-    <button id="talkBtn" class="btn btn-primary" onclick="startVoice()">🎙️ Talk to Me</button>
-    <div class="response-box"><p><strong>You said:</strong> <span id="userText"></span></p><p><strong>AI:</strong> <span id="aiResponse"></span></p></div>
+    <h3>Talk to Guardian</h3><p>Press the button and ask out loud, for example "Where is Thabo?" or "How does SOS work?"</p>
+    <img id="voiceFace" class="voice-face" src="human-face.jpg" alt="Guardian AI assistant face" onerror="this.style.display='none'">
+    <button id="talkBtn" class="btn btn-primary" onclick="startVoice()">🎙️ Talk to Guardian</button>
+    <div class="response-box"><p><strong>You said:</strong> <span id="userText"></span></p><p><strong>Guardian:</strong> <span id="aiResponse"></span></p></div>
   </div></div>
-  <div class="lab-panel hidden" id="tab-tips" style="max-width:860px">
-    <h3>🛍️ Smart Store</h3><p>Tap a product to get AI-written tips for getting the most out of it.</p>
-    <div class="products">
-      <div class="product"><h4>🎧 Wireless Buds</h4><p>High-quality sound with noise cancellation.</p><button class="btn btn-primary btn-small" onclick="getTips('Wireless Buds')">💡 Get Smart Tips</button></div>
-      <div class="product"><h4>📒 Smart Planner</h4><p>Organize your life with AI-assisted planning.</p><button class="btn btn-primary btn-small" onclick="getTips('Smart Planner')">💡 Get Smart Tips</button></div>
-      <div class="product"><h4>💻 Acer Aspire 5 15</h4><p>Everyday laptop.</p><button class="btn btn-primary btn-small" onclick="getTips('Acer Aspire 5 15')">💡 Get Smart Tips</button></div>
-    </div>
-  </div>
 </section>
 
 <!-- GUARDIAN -->
@@ -956,44 +947,58 @@ function toggleBilling() {
 
 /* ═══════ AI LAB TABS ═══════ */
 function showTab(name) {
-  ['support', 'voice', 'tips'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
+  ['support', 'voice'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
   document.querySelectorAll('.lab-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   if (name === 'support' && !$('supportBox').children.length) {
-    addBubble($('supportBox'), 'ai', 'Hi! Ask me about shoe sizes, colours, delivery or where we are.', '🤖');
+    addBubble($('supportBox'), 'ai', 'Hi! I can help with SafeZone plans, pairing, SOS, safe zones and more. What would you like to know?', '🤖');
   }
 }
 
 /* ═══════ SUPPORT BOT ═══════ */
-const STORE_KNOWLEDGE = `Business Info:
-- Shoe size: 10
-- Colors available: red, black, white
-- Delivery time: 10 - 15 days
-- Location: Pretoria`;
+const SAFEZONE_KNOWLEDGE = `About SafeZone:
+- SafeZone is a personal safety platform: a smartwatch + smart tag + mobile app (Android and iPhone) with an AI Guardian assistant.
+- Based in Tshwane (Pretoria), South Africa. Started as a TUT ICT first-year project. The app is coming soon.
+- For children, elderly relatives, people with disabilities, students, women travelling alone, lone workers, pet owners and businesses.
+- The wearer does not need a smartphone. Only the guardian needs the app.
+Features: live location, safe-zone (geofence) alerts, SOS button (hold 3 seconds), route history, family sharing, smart tag support, smartwatch support, emergency contact notifications, AI Guardian assistant, battery and offline alerts, SMS fallback when there is no data.
+Plans (example prices in rand, not final):
+- Free: R0. 1 person or tag, live location, safe-zone alerts, basic SOS.
+- Family: R99/month (R990/year). Up to 5 people or tags, SMS fallback, 30-day route history, family sharing, battery/offline alerts, AI Guardian.
+- Premium: R199/month (R1,990/year). Everything in Family, up to 10 people or tags, fall detection, unlimited route history, emergency contact notifications, priority alerts.
+- Business: R149 per seat/month (R1,490/year). Team dashboard, group tracking, lone-worker check-ins, reports, admin roles, fall detection, dedicated support.
+- Basic SOS and safe-zone alerts are always free.
+Pairing: turn on the watch and tag, tap "Add device" in the app and hold them within 30cm. Takes under a minute.
+Privacy: data is encrypted; only invited guardians see it; tracking adults needs their consent (POPIA).
+Contact: hello@safezone.demo, +27 12 000 0000 (demo details).`;
 
-const SUPPORT_SYSTEM = `You are a helpful clothing store assistant.
+const SUPPORT_SYSTEM = `You are the SafeZone customer support assistant.
 IMPORTANT RULES:
-- ONLY answer questions related to the store, orders, sizes, colors, delivery, or store information
-- DO NOT answer questions outside of this business context
-- If the user asks something unrelated, politely refuse
-You can:
-- Help users choose the correct shoe size from cm
-- Recommend available products from the store knowledge
-- Answer questions about delivery, colors, and availability
-Be friendly, short, and conversational.
-Store Knowledge:
+- ONLY answer questions about SafeZone: its plans, prices, features, setup, pairing, safety alerts, privacy and contact details.
+- Use only the knowledge below. If you don't know, say so and suggest the contact details.
+- If the user asks something unrelated to SafeZone, politely say you can only help with SafeZone questions.
+- Never give medical, legal or emergency-services advice. In a real emergency tell the user to call the police (10111) or 112.
+Be friendly, short and conversational (2 to 4 sentences).
+SafeZone Knowledge:
 ---------------------
-${STORE_KNOWLEDGE}
+${SAFEZONE_KNOWLEDGE}
 ---------------------`;
 
 let supportHistory = [];
 
 function supportFallback(t) {
   t = t.toLowerCase();
-  if (/(color|colour|red|black|white)/.test(t)) return 'We have the shoes in red, black and white.';
-  if (/(deliver|shipping|how long|arrive)/.test(t)) return 'Delivery takes 10 to 15 days.';
-  if (/(where|location|located|address)/.test(t)) return 'We are based in Pretoria.';
-  if (/(size|cm|fit)/.test(t)) return 'We currently stock size 10. Tell me your foot length in cm and I can help you check the fit.';
-  return 'I can help with sizes, colours, delivery and our location. What would you like to know?';
+  if (/(price|cost|how much|plan|subscription|premium|family|business|free)/.test(t)) return 'We have four plans: Free (R0), Family (R99/month), Premium (R199/month) and Business (R149 per seat/month). Basic SOS and safe-zone alerts are free on every plan. See the Pricing section for what each includes.';
+  if (/(pair|connect|bluetooth|setup|set up|install)/.test(t)) return 'To pair, turn on the watch and tag, tap "Add device" in the app and hold them within 30cm of each other. It usually takes under a minute.';
+  if (/(sos|emergency|panic)/.test(t)) return 'Hold the SOS button on the watch for 3 seconds. Your live location and an alarm go to your phone and your emergency contacts. In a real emergency, also call 10111 or 112.';
+  if (/(fall)/.test(t)) return 'Fall detection is part of the Premium and Business plans. It alerts your emergency contacts if a hard fall is detected.';
+  if (/(battery|charge)/.test(t)) return 'You get a low-battery alert at 20% for both the watch and the tag, so there is time to charge.';
+  if (/(offline|no signal|no internet|mobile data|sms)/.test(t)) return 'If mobile data drops, alerts fall back to SMS, so you still hear about SOS presses and zone alerts.';
+  if (/(privacy|private|secure|encrypt|popia|consent|my data)/.test(t)) return 'Your data is encrypted and only guardians you invite can see it. Tracking an adult needs their consent, in line with POPIA.';
+  if (/(where|location|located|address|based)/.test(t)) return 'SafeZone is based in Tshwane (Pretoria), South Africa.';
+  if (/(smartphone|child|kid)/.test(t)) return 'Your child does not need a smartphone. They wear the watch with the tag, and only you need the SafeZone app.';
+  if (/(safe zone|safe-zone|geofence|distance|zone)/.test(t)) return 'You draw a safe zone on the map and choose a safe distance. If the person leaves it, you get a push alert, with SMS as a backup.';
+  if (/(contact|email|phone number|call us|speak to someone)/.test(t)) return 'You can reach us at hello@safezone.demo or +27 12 000 0000 (demo details), or use the contact form on this page.';
+  return 'I can help with SafeZone plans and prices, pairing, SOS, safe zones, battery and privacy. What would you like to know?';
 }
 
 async function handleSupport() {
@@ -1020,7 +1025,7 @@ async function handleSupport() {
 $('supportInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSupport(); });
 
 /* ═══════ VOICE AI ═══════ */
-const VOICE_SYSTEM = "You are a friendly, conversational voice assistant for an electronics store in south africa. Only answer questions about electronics. If the question is unrelated, say: 'I can only help with electronics - related questions.' Keep responses short and natural, like a real conversation. Allow follow-up questions and maintain context.";
+const VOICE_SYSTEM = "You are Guardian, the friendly voice assistant for SafeZone, a personal safety platform made of a smartwatch, a smart tag and a mobile app, based in Pretoria, South Africa. You help guardians with questions about live location, safe-zone alerts, SOS (hold for 3 seconds), battery, pairing, SMS fallback, plans (Free R0, Family R99, Premium R199, Business R149 per seat per month, example prices) and privacy. Demo family: Thabo was last seen 4 minutes ago near Oak Street on his usual route to school, 32 metres away, inside the 50 metre safe distance, watch battery 61 percent, tag 74 percent. Only answer questions about SafeZone. If the question is unrelated, say: 'I can only help with SafeZone questions.' In a real emergency tell the user to call 10111 or 112. Keep responses short and natural, like a real conversation, with no lists or formatting. Allow follow-up questions and maintain context.";
 let voiceHistory = [];
 
 function cleanForSpeech(s) {
@@ -1035,7 +1040,7 @@ async function getVoiceReply(prompt) {
     return cleanForSpeech(reply);
   } catch (err) {
     console.error(err);
-    return "Sorry, I couldn't reach the AI right now.";
+    return cleanForSpeech(guardianReply(prompt));
   }
 }
 function speak(text) {
@@ -1068,7 +1073,7 @@ async function handleVoiceText(text) {
 }
 function startVoice() {
   const btn = $('talkBtn');
-  const reset = () => { btn.disabled = false; btn.textContent = '🎙️ Talk to Me'; };
+  const reset = () => { btn.disabled = false; btn.textContent = '🎙️ Talk to Guardian'; };
   btn.disabled = true;
   btn.textContent = '🎧 Listening...';
   if (window.SpeechSDK && CONFIG.speechKey) {
@@ -1092,29 +1097,13 @@ function startVoice() {
   r.start();
 }
 
-/* ═══════ SMART TIPS ═══════ */
-const LOCAL_TIPS = {
-  'Wireless Buds': 'Charge the case overnight, try different ear-tip sizes for better noise cancellation, and keep the firmware updated.',
-  'Smart Planner': 'Plan your top three tasks each morning, block time for deep work, and review your week every Sunday.',
-  'Acer Aspire 5 15': 'Turn on battery saver when unplugged, add an SSD or extra RAM if it feels slow, and keep drivers updated.'
-};
+/* ═══════ TOAST ═══════ */
 let toastTimer;
 function showToast(text) {
   $('toastText').textContent = text;
   $('toast').classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => $('toast').classList.remove('show'), 9000);
-}
-async function getTips(product) {
-  showToast('Thinking up tips for ' + product + '…');
-  try {
-    const tips = await callAI('You give short, practical product tips. Reply with 3 numbered tips, under 60 words in total. No markdown formatting.',
-      [{ role: 'user', content: 'Give me smart tips for getting the most out of this product: ' + product }], 700);
-    showToast(tips);
-  } catch (err) {
-    console.error(err);
-    showToast(LOCAL_TIPS[product] || 'Read the manual and keep it updated.');
-  }
+  toastTimer = setTimeout(() => $('toast').classList.remove('show'), 5000);
 }
 
 /* ═══════ GUARDIAN WIDGET (rule-based demo) ═══════ */
